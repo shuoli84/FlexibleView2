@@ -1,0 +1,5 @@
+XcodeCoverage/*
+Podfile.lock
+Pods/*
+.idea/*
+*.xcworkspace
