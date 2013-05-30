@@ -16,36 +16,36 @@ SPEC_BEGIN(DeclarationSpec)
                 __block FVDeclaration *root;
 
                 beforeEach(^{
-                    root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] Declarations:@[
-                                [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] Declarations:@[
-                                    [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
-                                    [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))], ]],
-                                [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] Declarations:@[
-                                    [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
-                                    [FVDeclaration declaration:@"percentOther50" frame:CGRectMake(0, 0, FVP(0.5), FVSameAsPrev)],
+                    root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] withDeclarations:@[
+                        [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] withDeclarations:@[
+                            [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
+                            [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))],]],
+                        [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] withDeclarations:@[
+                            [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
+                            [FVDeclaration declaration:@"percentOther50" frame:CGRectMake(0, 0, FVP(0.5), FVSameAsPrev)],
 
-                                    [FVDeclaration declaration:@"fillLeft" frame:CGRectMake(0, 44, 44, FVSameAsPrev)],
-                                    [FVDeclaration declaration:@"fill" frame:CGRectMake(FVAfter, 44, FVFill, FVSameAsPrev)], //the fill's width should be 1000-44*2
-                                    [FVDeclaration declaration:@"fillRight" frame:CGRectMake(FVT(44), 44, 44, FVSameAsPrev)],
+                            [FVDeclaration declaration:@"fillLeft" frame:CGRectMake(0, 44, 44, FVSameAsPrev)],
+                            [FVDeclaration declaration:@"fill" frame:CGRectMake(FVAfter, 44, FVFill, FVSameAsPrev)], //the fill's width should be 1000-44*2
+                            [FVDeclaration declaration:@"fillRight" frame:CGRectMake(FVT(44), 44, 44, FVSameAsPrev)],
 
-                                    [FVDeclaration declaration:@"followLeft" frame:CGRectMake(0, 44*2, 44, FVSameAsPrev)],
-                                    [FVDeclaration declaration:@"follow1" frame:CGRectMake(FVAfter, 44*2, 44, FVSameAsPrev)],
-                                    [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44*2, 44, 44)],
+                            [FVDeclaration declaration:@"followLeft" frame:CGRectMake(0, 44 * 2, 44, FVSameAsPrev)],
+                            [FVDeclaration declaration:@"follow1" frame:CGRectMake(FVAfter, 44 * 2, 44, FVSameAsPrev)],
+                            [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44 * 2, 44, 44)],
 
-                                    [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, 44)] Declarations:@[
-                                       [FVDeclaration declaration:@"auto1" frame:CGRectMake(0, 44*3, 44, 44)],
-                                       [FVDeclaration declaration:@"auto2" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
-                                       [FVDeclaration declaration:@"auto3" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
-                                       [FVDeclaration declaration:@"auto4" frame:CGRectMake(FVR(0), FVAfter, 44, 44)],
-                                    ]],
-                                    [[FVDeclaration declaration:@"ypercent" frame:CGRectMake(0, FVAfter, FVP(1), 300)] Declarations:@[
-                                        [FVDeclaration declaration:@"yp1" frame:CGRectMake(0, 0, FVP(0.5), FVP(1.0/3))],
-                                        [FVDeclaration declaration:@"yp2" frame:CGRectMake(0, FVAfter, FVP(0.5), FVP(1.0/3))],
-                                        [FVDeclaration declaration:@"yfill" frame:CGRectMake(0, FVAfter, FVFill, FVFill)],
-                                    ]],
-                                ]],
+                            [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, 44)] withDeclarations:@[
+                                [FVDeclaration declaration:@"auto1" frame:CGRectMake(0, 44 * 3, 44, 44)],
+                                [FVDeclaration declaration:@"auto2" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
+                                [FVDeclaration declaration:@"auto3" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
+                                [FVDeclaration declaration:@"auto4" frame:CGRectMake(FVR(0), FVAfter, 44, 44)],
+                            ]],
+                            [[FVDeclaration declaration:@"ypercent" frame:CGRectMake(0, FVAfter, FVP(1), 300)] withDeclarations:@[
+                                [FVDeclaration declaration:@"yp1" frame:CGRectMake(0, 0, FVP(0.5), FVP(1.0 / 3))],
+                                [FVDeclaration declaration:@"yp2" frame:CGRectMake(0, FVAfter, FVP(0.5), FVP(1.0 / 3))],
+                                [FVDeclaration declaration:@"yfill" frame:CGRectMake(0, FVAfter, FVFill, FVFill)],
+                            ]],
+                        ]],
                     ]];
-                    [root calculateLayoutWithError];
+                    [root calculateLayout];
                 });
 
                 it(@"should able to fetch by name", ^{
@@ -69,7 +69,7 @@ SPEC_BEGIN(DeclarationSpec)
 
                 it(@"should able to accept absolute values", ^{
                     NSError* error;
-                    [root calculateLayoutWithError];
+                    [root calculateLayout];
                     [error shouldBeNil];
                     [[theValue(root.frame.origin.x) should] equal:theValue(0)];
                     [[theValue(root.frame.size.width) should] equal:theValue(1000)];
@@ -104,10 +104,6 @@ SPEC_BEGIN(DeclarationSpec)
 
                 it( @"should be calculated", ^{
                     [[theValue([root calculated:YES]) should] beTrue];
-                });
-
-                it(@"view should not be nil", ^{
-                    [[root view] shouldNotBeNil];
                 });
             });
         });

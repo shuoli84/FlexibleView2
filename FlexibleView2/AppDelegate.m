@@ -24,14 +24,14 @@
     };
 
     FVDeclareTemplateBlock template = ^{
-        return [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] Declarations:@[
-        [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
-        [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))], ]];
+        return [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] withDeclarations:@[
+            [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
+            [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))],]];
     };
 
-    FVDeclaration *root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, self.window.screen.bounds.size.width, self.window.screen.bounds.size.height - 30)] Declarations:@[
+    FVDeclaration *root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, self.window.screen.bounds.size.width, self.window.screen.bounds.size.height - 30)] withDeclarations:@[
         template(),
-        [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] Declarations:@[
+        [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] withDeclarations:@[
             [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
             [FVDeclaration declaration:@"percentOther50" frame:CGRectMake(0, 0, FVP(0.5), FVSameAsPrev)],
 
@@ -39,46 +39,45 @@
             [FVDeclaration declaration:@"fill" frame:CGRectMake(FVAfter, 44, FVFill, FVSameAsPrev)], //the fill's width should be 1000-44*2
             [FVDeclaration declaration:@"fillRight" frame:CGRectMake(FVT(44), 44, 44, FVSameAsPrev)],
 
-            [FVDeclaration declaration:@"followLeft" frame:CGRectMake(0, 44*2, 44, FVSameAsPrev)],
-            [FVDeclaration declaration:@"follow1" frame:CGRectMake(FVAfter, 44*2, 44, FVSameAsPrev)],
-            [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44*2, 44, 44)],
+            [FVDeclaration declaration:@"followLeft" frame:CGRectMake(0, 44 * 2, 44, FVSameAsPrev)],
+            [FVDeclaration declaration:@"follow1" frame:CGRectMake(FVAfter, 44 * 2, 44, FVSameAsPrev)],
+            [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44 * 2, 44, 44)],
 
             //Add one space here
-            [[FVDeclaration declaration:@"space" frame:CGRectMake(0, FVAfter, FVFill, 30)] ObjectCreationBlock:space ],
+            [[FVDeclaration declaration:@"space" frame:CGRectMake(0, FVAfter, FVFill, 30)] assignObjectCreationBlock:space],
 
-            [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, FVAuto)] Declarations:@[
+            [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, FVAuto)] withDeclarations:@[
                 [FVDeclaration declaration:@"auto1" frame:CGRectMake(10, 0, 44, 44)],
                 [FVDeclaration declaration:@"auto2" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
                 [FVDeclaration declaration:@"auto3" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
-                [FVDeclaration declaration:@"auto4" frame:CGRectMake(FVR(0), FVA(10), 44, 44)], ]], ]],
-        [[FVDeclaration declaration:@"gauge" frame:CGRectMake(0, FVT(88), FVP(1), 44)] Declarations:^{
+                [FVDeclaration declaration:@"auto4" frame:CGRectMake(FVR(0), FVA(10), 44, 44)],]],]],
+        [[FVDeclaration declaration:@"gauge" frame:CGRectMake(0, FVT(88), FVP(1), 44)] withDeclarations:^{
             NSMutableArray *array = [NSMutableArray array];
-            for(int i = 0; i < 20; ++i){
-                FVDeclaration * d = [FVDeclaration declaration:[NSString stringWithFormat:@"%d", i] frame:CGRectMake(FVP(0.05*i), 0, FVP(0.05), FVP(1))];
+            for (int i = 0; i < 20; ++i) {
+                FVDeclaration *d = [FVDeclaration declaration:[NSString stringWithFormat:@"%d", i] frame:CGRectMake(FVP(0.05 * i), 0, FVP(0.05), FVP(1))];
                 d.debug = YES;
                 [array addObject:d];
             }
             return array;
         }()],
-        [template() Frame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)], ]];
+        [template() Frame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)],]];
 
-    // set auto's background to yellow
     FVDeclaration *autoD = [root declarationByName:@"auto"];
-    [autoD Object:^{
+    [autoD assignObject:^{
         UIView *v = [[UIView alloc] init];
         v.backgroundColor = [UIColor yellowColor];
         return v;
     }()];
 
     UIViewController *controller = [[UIViewController alloc] init];
-    UIView *view = [root view];
-    // add the background color for each view
-    [[view subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    [root assignObject:controller.view];
+    [root loadView];
+    // add the background color for each loadView
+    [[controller.view subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         UIView *v = obj;
         UIColor *color = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
         v.backgroundColor = color;
     }];
-    [controller.view addSubview:view];
     self.window.rootViewController = controller;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

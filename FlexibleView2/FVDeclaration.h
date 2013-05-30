@@ -23,7 +23,7 @@
 * This view contains several subviews, calculate the height automatically.
 * This view is half width of its parent view.
 * This view's width just fills the gap between prev and next view.
-* This view has the same x with prev view.
+* This view has the same x with prev loadView.
 *
 */
 #define FVSpecialValueMin 100000
@@ -45,13 +45,13 @@
 #define FVAfter FVAfter2Float(0)
 
 /**
-* FVFill make this view fill part, for width, it is xViewNext + widthViewNext - xViewPrev - xViewWidth
+* FVFill make this loadView fill part, for width, it is xViewNext + widthViewNext - xViewPrev - xViewWidth
 */
 #define FVFill 100001
 #define FVIsFill(x) ((x)==FVFill)
 
 /**
-* FVAuto automatic calculate this view's width or height to make it just hold all sub views
+* FVAuto automatic calculate this loadView's width or height to make it just hold all sub views
 */
 #define FVAuto 100002
 #define FVIsAuto(x) ((x)==FVAuto)
@@ -99,7 +99,7 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 *
 * Example usage:
 *
-*         [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] Declarations:@[
+*         [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] withDeclarations:@[
 *             [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
 *             [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))], ]]
 *
@@ -112,7 +112,7 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 *
 * @warning *note* prev view only counts in the siblings in the same parent.
 * @warning *important* **when use auto, all its subviews' related frame attributes must be able to calculated without
-* this view's info, otherwise, a dependency loop detected and error return
+* this loadView's info, otherwise, a dependency loop detected and error return
 */
 
 @interface FVDeclaration : NSObject
@@ -139,7 +139,7 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 
 /**
 * The object is the view for this declaration, it will be merged with all sub declaration and returned
-* when [self view] called
+* when [self loadView] called
 */
 @property (nonatomic, strong) UIView *object; //this is the object which this declaration owns
 
@@ -149,7 +149,7 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 * @warning: *note* if neither object nor objectCreationBlock exists, the library will create a default UIView with random
 * color. The random color indicates that you forget something and useful when just trouble shooting the layout issue.
 */
-@property (nonatomic, strong) FVViewCreateBlock objectCreationBlock;
+@property (nonatomic, copy) FVViewCreateBlock objectCreationBlock;
 
 /**
 * The context will be passed into the objectCreationBlock when create the object, useful for pass
@@ -163,18 +163,18 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 @property (nonatomic) BOOL debug;
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
--(FVDeclaration *)Object:(UIView*)object;
--(FVDeclaration *)ObjectCreationBlock:(FVViewCreateBlock)creationBlock;
--(FVDeclaration *)Declarations:(NSArray*)array;
+-(FVDeclaration *)assignObject:(UIView*)object;
+-(FVDeclaration *)assignObjectCreationBlock:(FVViewCreateBlock)creationBlock;
+-(FVDeclaration *)withDeclarations:(NSArray*)array;
 -(FVDeclaration *)Context:(NSDictionary *)context;
 -(FVDeclaration *)declarationByName:(NSString*)name;
 
 -(FVDeclaration *)Frame:(CGRect)frame;
 
 /**
-* Calculate the layout, call this before get the final view
+* Calculate the layout, call this before get the final loadView
 */
--(void)calculateLayoutWithError;
+-(void)calculateLayout;
 
 /**
 * Get the layout calculation status
@@ -185,7 +185,11 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 -(BOOL)calculated:(BOOL)recursive;
 
 /**
-* Get the fully setup view, it contains all the sub views.
+* Get the fully setup loadView, it contains all the sub views.
+*
+* @warning: *important* When get the view, it will give up the ownership to prevent cycle pointer.
+* From that point, declaration only holds a weak pointer for future usage.
 */
--(UIView *)view;
+-(UIView *)loadView;
 @end
+

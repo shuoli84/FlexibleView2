@@ -9,10 +9,12 @@
 #import "FVDeclaration.h"
 
 @interface FVDeclaration()
-@property (nonatomic) BOOL xCalculated;
-@property (nonatomic) BOOL yCalculated;
-@property (nonatomic) BOOL widthCalculated;
-@property (nonatomic) BOOL heightCalculated;
+@property (nonatomic, assign) BOOL xCalculated;
+@property (nonatomic, assign) BOOL yCalculated;
+@property (nonatomic, assign) BOOL widthCalculated;
+@property (nonatomic, assign) BOOL heightCalculated;
+
+@property (nonatomic, weak) UIView* weakObject;
 @end
 
 @implementation FVDeclaration
@@ -30,17 +32,17 @@
     return declaration;
 }
 
--(FVDeclaration *)Object:(UIView*)object{
+-(FVDeclaration *)assignObject:(UIView*)object{
     self.object = object;
     return self;
 
 }
--(FVDeclaration *)ObjectCreationBlock:(FVViewCreateBlock)creationBlock{
+-(FVDeclaration *)assignObjectCreationBlock:(FVViewCreateBlock)creationBlock{
     self.objectCreationBlock = creationBlock;
     return self;
 }
 
--(FVDeclaration *)Declarations:(NSArray *)array{
+-(FVDeclaration *)withDeclarations:(NSArray *)array{
     self.subDeclarations = [array mutableCopy];
     [self.subDeclarations enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         [(FVDeclaration *)obj setParent:self];
@@ -69,7 +71,7 @@
     return nil;
 }
 
--(void)calculateLayoutWithError{
+-(void)calculateLayout {
     if(!self.xCalculated){
         CGFloat x = self.frame.origin.x;
         if(FVIsNormal(x)){
@@ -139,7 +141,7 @@
             FVDeclaration *next = [self nextSibling];
             if (next) {
                 if(!next.xCalculated){
-                    [next calculateLayoutWithError];
+                    [next calculateLayout];
                 }
 
                 if(next.xCalculated){
@@ -155,7 +157,7 @@
                 CGFloat width = 0.0f;
                 for( FVDeclaration *declaration in self.subDeclarations){
                     if(!declaration.xCalculated && !declaration.widthCalculated){
-                        [declaration calculateLayoutWithError];
+                        [declaration calculateLayout];
                     }
                     NSAssert(declaration.xCalculated && declaration.widthCalculated, @"Auto for w: sub declaration's x and width must be calculated");
                     CGFloat right = declaration.frame.origin.x + declaration.frame.size.width;
@@ -235,7 +237,7 @@
             FVDeclaration *next = [self.parent nextSiblingOfChild:self];
             if (next) {
                 if(!next.yCalculated){
-                    [next calculateLayoutWithError];
+                    [next calculateLayout];
                     NSAssert(next.yCalculated, @"FVFill for height: next y must be calculated");
                     [self assignHeight: next.frame.origin.y - self.frame.origin.y];
                 }
@@ -248,7 +250,7 @@
             if (self.subDeclarations && self.subDeclarations.count > 0){
                 CGFloat height = 0.0f;
                 for(FVDeclaration *declaration in self.subDeclarations){
-                    [declaration calculateLayoutWithError];
+                    [declaration calculateLayout];
                     NSAssert(declaration.yCalculated && declaration.heightCalculated, @"FVAuto: y and height must calculated");
                     CGFloat bottom = declaration.frame.origin.y + declaration.frame.size.height;
                     height = height > bottom ? height : bottom;
@@ -265,7 +267,7 @@
     }
 
     for(FVDeclaration *declaration in self.subDeclarations){
-        [declaration calculateLayoutWithError];
+        [declaration calculateLayout];
     }
 }
 
@@ -341,29 +343,38 @@
     return YES;
 }
 
--(UIView*)view{
+-(UIView*)loadView {
     if (![self calculated:YES]){
         NSError *error;
-        [self calculateLayoutWithError];
+        [self calculateLayout];
     }
 
     if(!self.object){
-        if(self.objectCreationBlock){
-            self.object = self.objectCreationBlock(self.context);
+        if(self.weakObject){
+            //This declaration already bind to a view
+            self.object = self.weakObject;
         }
-        else{
-            self.object = [[UIView alloc] init];
-            self.object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
+        if (!self.object) {
+            if(self.objectCreationBlock){
+                self.object = self.objectCreationBlock(self.context);
+            }
+            else{
+                self.object = [[UIView alloc] init];
+                self.object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
+            }
         }
     }
     self.object.frame = self.frame;
 
     for(FVDeclaration *declaration in self.subDeclarations){
-        UIView *v = [declaration view];
+        UIView *v = [declaration loadView];
         [self.object addSubview:v];
     }
 
-    return self.object;
+    UIView * result = self.object;
+    self.weakObject = self.object;
+    self.object = nil; //when loadView called, we don't own the object, it is the side effect of loadView
+    return result;
 }
 
 -(FVDeclaration *)Frame:(CGRect)frame{
