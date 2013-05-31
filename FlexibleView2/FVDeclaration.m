@@ -37,10 +37,6 @@
     return self;
 
 }
--(FVDeclaration *)assignObjectCreationBlock:(FVViewCreateBlock)creationBlock{
-    self.objectCreationBlock = creationBlock;
-    return self;
-}
 
 -(FVDeclaration *)withDeclarations:(NSArray *)array{
     self.subDeclarations = [array mutableCopy];
@@ -243,7 +239,7 @@
                 }
             }
             else{
-                [self assignHeight:self.parent.frame.size.width - self.frame.origin.y];
+                [self assignHeight:self.parent.frame.size.height - self.frame.origin.y];
             }
         }
         else if(FVIsAuto(h)){
@@ -377,8 +373,13 @@
     return result;
 }
 
--(FVDeclaration *)Frame:(CGRect)frame{
+-(FVDeclaration *)assignFrame:(CGRect)frame{
     self.frame = frame;
+    return self;
+}
+
+-(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock {
+    processBlock(self);
     return self;
 }
 @end

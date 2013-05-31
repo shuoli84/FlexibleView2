@@ -18,7 +18,10 @@ SPEC_BEGIN(DeclarationSpec)
                 beforeEach(^{
                     root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] withDeclarations:@[
                         [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] withDeclarations:@[
-                            [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
+                            [[FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))] process:^(FVDeclaration *declaration) {
+                                declaration.object = [[UIView alloc] init];
+                                declaration.object.tag = 3;
+                            }],
                             [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))],]],
                         [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] withDeclarations:@[
                             [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
@@ -104,6 +107,11 @@ SPEC_BEGIN(DeclarationSpec)
 
                 it( @"should be calculated", ^{
                     [[theValue([root calculated:YES]) should] beTrue];
+                });
+
+                it( @"should support process", ^{
+                    [[theValue([root declarationByName:@"MenuButton"].object.tag) should] equal:
+                    theValue(3)];
                 });
             });
         });

@@ -44,7 +44,7 @@
             [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44 * 2, 44, 44)],
 
             //Add one space here
-            [[FVDeclaration declaration:@"space" frame:CGRectMake(0, FVAfter, FVFill, 30)] assignObjectCreationBlock:space],
+            [[FVDeclaration declaration:@"space" frame:CGRectMake(0, FVAfter, FVFill, 30)] assignObject:space(nil)],
 
             [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, FVAuto)] withDeclarations:@[
                 [FVDeclaration declaration:@"auto1" frame:CGRectMake(10, 0, 44, 44)],
@@ -60,7 +60,7 @@
             }
             return array;
         }()],
-        [template() Frame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)],]];
+        [template() assignFrame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)],]];
 
     FVDeclaration *autoD = [root declarationByName:@"auto"];
     [autoD assignObject:^{

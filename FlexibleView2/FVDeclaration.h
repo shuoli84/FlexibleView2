@@ -94,6 +94,11 @@ typedef UIView* (^FVViewCreateBlock)(NSDictionary *context);
 typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 
 /**
+* The typedef of process block.
+*/
+typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
+
+/**
 * This class stands for one view, though just its declaration. It holds the position, size information and also
 * knows how to create the real UIView object.
 *
@@ -163,13 +168,13 @@ typedef FVDeclaration *(^FVDeclareTemplateBlock)();
 @property (nonatomic) BOOL debug;
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
--(FVDeclaration *)assignObject:(UIView*)object;
--(FVDeclaration *)assignObjectCreationBlock:(FVViewCreateBlock)creationBlock;
--(FVDeclaration *)withDeclarations:(NSArray*)array;
--(FVDeclaration *)Context:(NSDictionary *)context;
--(FVDeclaration *)declarationByName:(NSString*)name;
 
--(FVDeclaration *)Frame:(CGRect)frame;
+-(FVDeclaration *)assignObject:(UIView*)object;
+-(FVDeclaration *)assignFrame:(CGRect)frame;
+-(FVDeclaration *)withDeclarations:(NSArray*)array;
+-(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock;
+
+-(FVDeclaration *)declarationByName:(NSString*)name;
 
 /**
 * Calculate the layout, call this before get the final loadView
