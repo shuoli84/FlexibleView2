@@ -113,6 +113,12 @@ SPEC_BEGIN(DeclarationSpec)
                     [[theValue([root declarationByName:@"MenuButton"].object.tag) should] equal:
                     theValue(3)];
                 });
+
+                it(@"should support recalculate on newer setted frame", ^{
+                    [root resetLayout];
+                    [root assignFrame:CGRectMake(0, 0, 100, 100)];
+                    UIView *v = [root loadView];
+                });
             });
         });
 SPEC_END

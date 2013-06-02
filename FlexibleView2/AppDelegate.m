@@ -12,6 +12,11 @@
 #import "DDASLLogger.h"
 #import "DDTTYLogger.h"
 #import "FVDeclaration.h"
+#import "UIControl+BlocksKit.h"
+#import <BlocksKit.h>
+@interface AppDelegate()
+@property (nonatomic, strong) FVDeclaration *root;
+@end
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -29,7 +34,7 @@
             [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))],]];
     };
 
-    FVDeclaration *root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, self.window.screen.bounds.size.width, self.window.screen.bounds.size.height - 30)] withDeclarations:@[
+    self.root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, self.window.screen.bounds.size.width, self.window.screen.bounds.size.height - 30)] withDeclarations:@[
         template(),
         [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] withDeclarations:@[
             [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
@@ -51,6 +56,51 @@
                 [FVDeclaration declaration:@"auto2" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
                 [FVDeclaration declaration:@"auto3" frame:CGRectMake(FVAfter, FVAfter, 44, 44)],
                 [FVDeclaration declaration:@"auto4" frame:CGRectMake(FVR(0), FVA(10), 44, 44)],]],]],
+        [[FVDeclaration declaration:@"increaseme" frame:CGRectMake(0, FVT(350), FVP(1), 50)] assignObject:^{
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+            [button setTitle:@"click to increase" forState:UIControlStateNormal];
+            [button addEventHandler:^(id sender) {
+
+                CGFloat v = button.frame.size.height;
+
+                [self.root resetLayout];
+                [[self.root declarationByName:@"increaseme"] assignFrame:CGRectMake(0, FVT(350), FVP(1), v + 200)];
+                [self.root loadView];
+
+                [UIView beginAnimations:nil context:nil];
+                [self.root resetLayout];
+                [[self.root declarationByName:@"increaseme"] assignFrame:CGRectMake(0, FVT(350), FVP(1), v + 30)];
+                [self.root loadView];
+                [UIView commitAnimations];
+            } forControlEvents:UIControlEventTouchUpInside];
+
+            return button;
+        }()],
+        [[FVDeclaration declaration:@"addsomecontainer" frame:CGRectMake(0, FVT(550), FVP(1), 100)] withDeclarations:@[
+            [[FVDeclaration declaration:@"addsome" frame:CGRectMake(0, 0, FVP(1), 50)] assignObject:^{
+                UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+                [button setTitle:@"click add element" forState:UIControlStateNormal];
+                [button addEventHandler:^(id sender) {
+                    FVDeclaration *dec = [self.root declarationByName:@"addsomecontainer"];
+                    [dec resetLayout];
+                    FVDeclaration *newdec = [FVDeclaration declaration:@"newview" frame:CGRectMake(FVT(100), FVAfter, FVP(1), 50)];
+                    FVDeclaration *olddec = [dec declarationByName:@"newview"];
+
+                    [dec appendDeclaration:newdec];
+                    [dec loadView];
+
+                    [UIView beginAnimations:nil context:nil];
+                    [UIView setAnimationDuration:3];
+                    [dec resetLayout];
+                    [olddec removeFromParentDeclaration];
+                    [newdec assignFrame:CGRectMake(0, FVAfter, FVP(1), 50)];
+                    [dec loadView];
+                    [UIView commitAnimations];
+                } forControlEvents:UIControlEventTouchUpInside];
+
+                return button;
+        }()]
+        ]],
         [[FVDeclaration declaration:@"gauge" frame:CGRectMake(0, FVT(88), FVP(1), 44)] withDeclarations:^{
             NSMutableArray *array = [NSMutableArray array];
             for (int i = 0; i < 20; ++i) {
@@ -62,7 +112,7 @@
         }()],
         [template() assignFrame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)],]];
 
-    FVDeclaration *autoD = [root declarationByName:@"auto"];
+    FVDeclaration *autoD = [self.root declarationByName:@"auto"];
     [autoD assignObject:^{
         UIView *v = [[UIView alloc] init];
         v.backgroundColor = [UIColor yellowColor];
@@ -70,8 +120,8 @@
     }()];
 
     UIViewController *controller = [[UIViewController alloc] init];
-    [root assignObject:controller.view];
-    [root loadView];
+    [self.root assignObject:controller.view];
+    [self.root loadView];
     // add the background color for each loadView
     [[controller.view subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         UIView *v = obj;

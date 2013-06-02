@@ -6,7 +6,33 @@
 //
 
 
+#import <CoreGraphics/CoreGraphics.h>
 #import "FVDeclaration.h"
+
+@interface WeakReferenceWrapper:NSObject
+@property (nonatomic,weak) NSObject* weakReference;
+-(id)initWithReference:(NSObject *)reference;
+@end
+
+@implementation WeakReferenceWrapper
+-(id)initWithReference:(NSObject *)reference {
+    self = [super init];
+    if(self){
+        typeof(reference) __weak weakRef = reference;
+        self.weakReference = weakRef;
+    }
+    return self;
+}
+
+-(id)strongReference{
+    if(self.weakReference){
+        typeof(self.weakReference) __strong strongRef = self.weakReference;
+        return strongRef;
+    }
+
+    return nil;
+}
+@end
 
 @interface FVDeclaration()
 @property (nonatomic, assign) BOOL xCalculated;
@@ -14,10 +40,15 @@
 @property (nonatomic, assign) BOOL widthCalculated;
 @property (nonatomic, assign) BOOL heightCalculated;
 
-@property (nonatomic, weak) UIView* weakObject;
+@property (nonatomic, assign) CGRect unExpandedFrame; // this is the original frame which not expanded.
+
+//all the subviews managed by sub declaration
+@property (nonatomic, strong) NSMutableArray *declareManagedSubview;
+
 @end
 
 @implementation FVDeclaration
+@synthesize subDeclarations = _subDeclarations;
 
 -(id)init{
     if(self = [super init]){
@@ -35,19 +66,13 @@
 -(FVDeclaration *)assignObject:(UIView*)object{
     self.object = object;
     return self;
-
 }
 
 -(FVDeclaration *)withDeclarations:(NSArray *)array{
-    self.subDeclarations = [array mutableCopy];
-    [self.subDeclarations enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    _subDeclarations = [array mutableCopy];
+    [_subDeclarations enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         [(FVDeclaration *)obj setParent:self];
     }];
-    return self;
-}
-
-- (FVDeclaration *)Context:(NSDictionary *)context {
-    self.context = context;
     return self;
 }
 
@@ -56,7 +81,7 @@
         return self;
     }
     else{
-        for(FVDeclaration *declaration in self.subDeclarations){
+        for(FVDeclaration *declaration in _subDeclarations){
             FVDeclaration *dec = [declaration declarationByName:name];
             if(dec != nil){
                 return dec;
@@ -68,6 +93,27 @@
 }
 
 -(void)calculateLayout {
+    if (!self.xCalculated){
+        CGRect frame = self.unExpandedFrame;
+        frame.origin.x = self.frame.origin.x;
+        self.unExpandedFrame = frame;
+    }
+    if (!self.yCalculated){
+        CGRect frame = self.unExpandedFrame;
+        frame.origin.y = self.frame.origin.y;
+        self.unExpandedFrame = frame;
+    }
+    if (!self.widthCalculated){
+        CGRect frame = self.unExpandedFrame;
+        frame.size.width = self.frame.size.width;
+        self.unExpandedFrame = frame;
+    }
+    if (!self.heightCalculated){
+        CGRect frame = self.unExpandedFrame;
+        frame.size.height = self.frame.size.height;
+        self.unExpandedFrame = frame;
+    }
+
     if(!self.xCalculated){
         CGFloat x = self.frame.origin.x;
         if(FVIsNormal(x)){
@@ -149,9 +195,9 @@
             }
         }
         else if(FVIsAuto(w)){
-            if(self.subDeclarations && self.subDeclarations.count > 0){
+            if(_subDeclarations && _subDeclarations.count > 0){
                 CGFloat width = 0.0f;
-                for( FVDeclaration *declaration in self.subDeclarations){
+                for( FVDeclaration *declaration in _subDeclarations){
                     if(!declaration.xCalculated && !declaration.widthCalculated){
                         [declaration calculateLayout];
                     }
@@ -243,9 +289,9 @@
             }
         }
         else if(FVIsAuto(h)){
-            if (self.subDeclarations && self.subDeclarations.count > 0){
+            if (_subDeclarations && _subDeclarations.count > 0){
                 CGFloat height = 0.0f;
-                for(FVDeclaration *declaration in self.subDeclarations){
+                for(FVDeclaration *declaration in _subDeclarations){
                     [declaration calculateLayout];
                     NSAssert(declaration.yCalculated && declaration.heightCalculated, @"FVAuto: y and height must calculated");
                     CGFloat bottom = declaration.frame.origin.y + declaration.frame.size.height;
@@ -262,23 +308,23 @@
         }
     }
 
-    for(FVDeclaration *declaration in self.subDeclarations){
+    for(FVDeclaration *declaration in _subDeclarations){
         [declaration calculateLayout];
     }
 }
 
 -(FVDeclaration *)nextSiblingOfChild:(FVDeclaration *)declaration{
-    NSUInteger index = [self.subDeclarations indexOfObject:declaration];
-    if(index != NSNotFound && index + 1 < self.subDeclarations.count){
-        return self.subDeclarations[index+1];
+    NSUInteger index = [_subDeclarations indexOfObject:declaration];
+    if(index != NSNotFound && index + 1 < _subDeclarations.count){
+        return _subDeclarations[index+1];
     }
     return nil;
 }
 
 -(FVDeclaration *)prevSiblingOfChild:(FVDeclaration *)declaration{
-    NSUInteger index = [self.subDeclarations indexOfObject:declaration];
+    NSUInteger index = [_subDeclarations indexOfObject:declaration];
     if(index != NSNotFound && index > 0){
-        return self.subDeclarations[index-1];
+        return _subDeclarations[index-1];
     }
     return nil;
 }
@@ -287,12 +333,14 @@
     if(self.parent){
         return [self.parent prevSiblingOfChild:self];
     }
+    return nil;
 }
 
 -(FVDeclaration *)nextSibling{
     if(self.parent){
         return [self.parent nextSiblingOfChild:self];
     }
+    return nil;
 }
 
 -(void)assignWidth:(CGFloat)width{
@@ -323,13 +371,14 @@
     self.heightCalculated = YES;
 }
 
+
 -(BOOL)calculated:(BOOL)recursive {
 
     if (!self.xCalculated || !self.yCalculated || !self.widthCalculated || !self.heightCalculated){
         return NO;
     }
     if(recursive){
-        for(FVDeclaration *declaration in self.subDeclarations){
+        for(FVDeclaration *declaration in _subDeclarations){
             if(![declaration calculated:recursive]){
                 return NO;
             }
@@ -341,36 +390,35 @@
 
 -(UIView*)loadView {
     if (![self calculated:YES]){
-        NSError *error;
         [self calculateLayout];
     }
 
     if(!self.object){
-        if(self.weakObject){
-            //This declaration already bind to a view
-            self.object = self.weakObject;
-        }
-        if (!self.object) {
-            if(self.objectCreationBlock){
-                self.object = self.objectCreationBlock(self.context);
-            }
-            else{
-                self.object = [[UIView alloc] init];
-                self.object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
-            }
-        }
+        self.object = [[UIView alloc] init];
+        self.object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
     }
     self.object.frame = self.frame;
 
-    for(FVDeclaration *declaration in self.subDeclarations){
+    NSMutableArray *newManagedViews = [[NSMutableArray alloc] init];
+    NSMutableArray *removedManagedViews = [NSMutableArray arrayWithArray:self.declareManagedSubview];
+    for(FVDeclaration *declaration in _subDeclarations){
         UIView *v = [declaration loadView];
-        [self.object addSubview:v];
+        if([removedManagedViews indexOfObject:v] != NSNotFound){
+            //The view already been added, do nothing
+            [removedManagedViews removeObject:v];
+        }
+        else{
+            [self.object addSubview:v];
+        }
+        [newManagedViews addObject:v];
     }
 
-    UIView * result = self.object;
-    self.weakObject = self.object;
-    self.object = nil; //when loadView called, we don't own the object, it is the side effect of loadView
-    return result;
+    self.declareManagedSubview = newManagedViews;
+    for (UIView *view in removedManagedViews){
+        [view removeFromSuperview];
+    }
+
+    return self.object;
 }
 
 -(FVDeclaration *)assignFrame:(CGRect)frame{
@@ -381,5 +429,39 @@
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock {
     processBlock(self);
     return self;
+}
+
+-(void)resetLayout {
+    self.xCalculated = NO;
+    self.yCalculated = NO;
+    self.widthCalculated = NO;
+    self.heightCalculated = NO;
+
+    // restore the frame to the original one, doing this will discard all the changes made
+    // So in order to update the frame, one should call reset layout first, then set new frame
+    self.frame = self.unExpandedFrame;
+
+    for (FVDeclaration *declaration in _subDeclarations){
+        [declaration resetLayout];
+    }
+}
+
+-(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration {
+    NSMutableArray *subDeclarations = [NSMutableArray arrayWithArray:_subDeclarations];
+    [subDeclarations addObject:declaration];
+    _subDeclarations = subDeclarations;
+    declaration.parent = self;
+    return self;
+}
+
+-(void)removeDeclaration:(FVDeclaration*)declaration{
+    NSMutableArray *array = [NSMutableArray arrayWithArray:_subDeclarations];
+    [array removeObject:declaration];
+    _subDeclarations = array;
+}
+
+-(void)removeFromParentDeclaration {
+    [self.parent removeDeclaration:self];
+    self.parent = nil;
 }
 @end

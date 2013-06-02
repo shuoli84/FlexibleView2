@@ -135,7 +135,7 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 /**
 * The sub nodes if any
 */
-@property (nonatomic, strong) NSMutableArray *subDeclarations;
+@property (nonatomic, readonly) NSArray *subDeclarations;
 
 /**
 * The parent node if any
@@ -172,6 +172,8 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 -(FVDeclaration *)assignObject:(UIView*)object;
 -(FVDeclaration *)assignFrame:(CGRect)frame;
 -(FVDeclaration *)withDeclarations:(NSArray*)array;
+-(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration;
+-(void)removeFromParentDeclaration;
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock;
 
 -(FVDeclaration *)declarationByName:(NSString*)name;
@@ -180,6 +182,17 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 * Calculate the layout, call this before get the final loadView
 */
 -(void)calculateLayout;
+
+/**
+* Reset the calculated layout and clear the flags.
+* The purpose of this method: sometimes, we may want to update the layout of a specific view,
+* but modify that requires the whole layout change, e.g, change last view's height, which requires
+* shrink the above views.
+* In order to utilize the layout calculation logic, one need to resetLayout first, which will restore
+* layout to the original (not calculated status), then do frame change, then recalculate.
+* After this, the view's frame need to be bound again, one should call loadViews again.
+*/
+-(void)resetLayout;
 
 /**
 * Get the layout calculation status
