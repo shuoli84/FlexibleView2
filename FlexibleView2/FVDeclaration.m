@@ -439,7 +439,21 @@
 
     // restore the frame to the original one, doing this will discard all the changes made
     // So in order to update the frame, one should call reset layout first, then set new frame
-    self.frame = self.unExpandedFrame;
+    CGRect originalFrame = self.frame;
+    if(_xCalculated){
+        originalFrame.origin.x = self.unExpandedFrame.origin.x;
+    }
+    if(_yCalculated){
+        originalFrame.origin.y = self.unExpandedFrame.origin.y;
+    }
+    if(_widthCalculated){
+        originalFrame.size.width = self.unExpandedFrame.size.width;
+    }
+    if(_heightCalculated){
+        originalFrame.size.height = self.unExpandedFrame.size.height;
+    }
+
+    self.frame = originalFrame;
 
     for (FVDeclaration *declaration in _subDeclarations){
         [declaration resetLayout];
