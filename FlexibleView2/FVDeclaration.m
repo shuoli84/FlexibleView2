@@ -49,6 +49,7 @@
 
 @implementation FVDeclaration
 @synthesize subDeclarations = _subDeclarations;
+@synthesize parent = _parent;
 
 -(id)init{
     if(self = [super init]){
@@ -71,7 +72,7 @@
 -(FVDeclaration *)withDeclarations:(NSArray *)array{
     _subDeclarations = [array mutableCopy];
     [_subDeclarations enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        [(FVDeclaration *)obj setParent:self];
+        ((FVDeclaration *)obj)->_parent = self;
     }];
     return self;
 }
@@ -432,11 +433,6 @@
 }
 
 -(void)resetLayout {
-    self.xCalculated = NO;
-    self.yCalculated = NO;
-    self.widthCalculated = NO;
-    self.heightCalculated = NO;
-
     // restore the frame to the original one, doing this will discard all the changes made
     // So in order to update the frame, one should call reset layout first, then set new frame
     CGRect originalFrame = self.frame;
@@ -453,6 +449,11 @@
         originalFrame.size.height = self.unExpandedFrame.size.height;
     }
 
+    _xCalculated = NO;
+    _yCalculated = NO;
+    _widthCalculated = NO;
+    _heightCalculated = NO;
+
     self.frame = originalFrame;
 
     for (FVDeclaration *declaration in _subDeclarations){
@@ -464,7 +465,7 @@
     NSMutableArray *subDeclarations = [NSMutableArray arrayWithArray:_subDeclarations];
     [subDeclarations addObject:declaration];
     _subDeclarations = subDeclarations;
-    declaration.parent = self;
+    declaration->_parent = self;
     return self;
 }
 
@@ -476,6 +477,6 @@
 
 -(void)removeFromParentDeclaration {
     [self.parent removeDeclaration:self];
-    self.parent = nil;
+    self->_parent = nil;
 }
 @end

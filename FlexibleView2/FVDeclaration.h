@@ -28,21 +28,7 @@
 */
 #define FVSpecialValueMin 100000
 
-/**
-* The min of the range which reserved for After
-*/
-#define FVAfterMin 400000
 
-/**
-* The base value of the After
-*/
-#define FVAfterBase 450000
-#define FVAfterMax 499999
-#define FVIsAfter(x) ((x)>=FVAfterMin && (x) <= FVAfterMax)
-#define FVAfter2Float(x) ((x) + FVAfterBase)
-#define FVA FVAfter2Float
-#define FVFloat2After(x) ((x) - FVAfterBase)
-#define FVAfter FVAfter2Float(0)
 
 /**
 * FVFill make this loadView fill part, for width, it is xViewNext + widthViewNext - xViewPrev - xViewWidth
@@ -59,13 +45,18 @@
 /**
 *
 */
-#define FVPercentMin 100100
-#define FVPercentMax 100200
+#define FVPercentMin 110000
+#define FVPercentBase 115000
+#define FVPercentMax 120000
 #define FVIsPercent(x) ((x) >= FVPercentMin && (x) <= FVPercentMax)
-#define FVPercentToFloat(x) ((x)*100 + FVPercentMin)
+#define FVPercentToFloat(x) ((x)*100 + FVPercentBase)
 #define FVP(x) FVPercentToFloat(x)
-#define FVFloat2Percent(x) (((x) - FVPercentMin) / 100)
+#define FVFloat2Percent(x) (((x) - FVPercentBase) / 100)
 #define FVF2P(x) FVFloat2Percent(x)
+
+/**
+*
+*/
 #define FVTailMin 200000
 #define FVTailMax 299999
 #define FVIsTail(x) ((x) >= FVTailMin && (x) <= FVTailMax)
@@ -73,6 +64,10 @@
 #define FVT(x) FVTail2Float(x)
 #define FVFloat2Tail(x) ((x) - FVTailMin)
 #define FVF2T(x) FVFloat2Tail(x)
+
+/**
+*
+*/
 #define FVRelatedMin 300000
 #define FVRelatedBase 350000
 #define FVRelatedMax 399999
@@ -80,6 +75,22 @@
 #define FVR(x) ((x) + FVRelatedBase)
 #define FVF2R(x) ((x) - FVRelatedBase)
 #define FVSameAsPrev FVR(0)
+
+/**
+* The min of the range which reserved for After
+*/
+#define FVAfterMin 400000
+
+/**
+* The base value of the After
+*/
+#define FVAfterBase 450000
+#define FVAfterMax 499999
+#define FVIsAfter(x) ((x)>=FVAfterMin && (x) <= FVAfterMax)
+#define FVAfter2Float(x) ((x) + FVAfterBase)
+#define FVA FVAfter2Float
+#define FVFloat2After(x) ((x) - FVAfterBase)
+#define FVAfter FVAfter2Float(0)
 
 #define FVIsNormal(x) ((x) < FVSpecialValueMin)
 
@@ -140,7 +151,7 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 /**
 * The parent node if any
 */
-@property (nonatomic, weak) FVDeclaration *parent;
+@property (nonatomic, weak, readonly) FVDeclaration *parent;
 
 /**
 * The object is the view for this declaration, it will be merged with all sub declaration and returned
