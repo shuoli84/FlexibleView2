@@ -133,6 +133,20 @@ SPEC_BEGIN(DeclarationSpec)
                     [[theValue(flag) should] equal:theValue(1)];
 
                 });
+
+                it(@"should support calculate width and height based on Tail value", ^{
+                    FVDeclaration *declaration = [FVDeclaration declaration:@"parent" frame:CGRectMake(0, 0, 1000, 1000)];
+                    [[declaration withDeclarations:@[
+                        [FVDeclaration declaration:@"width" frame:CGRectMake(0, 0, FVT(100), FVP(1))],
+                        [FVDeclaration declaration:@"height" frame:CGRectMake(0, 0, FVP(1), FVT(200))],
+                    ]] loadView];
+
+                    FVDeclaration *width = [declaration declarationByName:@"width"];
+                    FVDeclaration *height = [declaration declarationByName:@"height"];
+
+                    [[theValue(width.frame.size.width) should] equal:theValue(900)];
+                    [[theValue(height.frame.size.height) should] equal:theValue(800)];
+                });
             });
         });
 SPEC_END

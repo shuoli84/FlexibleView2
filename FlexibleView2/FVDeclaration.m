@@ -6,6 +6,7 @@
 //
 
 
+#import <CoreGraphics/CoreGraphics.h>
 #import "FVDeclaration.h"
 
 @interface FVDeclaration()
@@ -157,6 +158,12 @@
                 [self assignWidth:FVF2R(w)];
             }
         }
+        else if (FVIsTail(w)){
+            NSAssert(self.parent, @"FVTail must has a valid parent, and its width already calcualted");
+            if(self.parent.widthCalculated){
+                [self assignWidth:self.parent.frame.size.width - FVF2T(w)];
+            }
+        }
         else if(FVIsFill(w)){
             //Need the next x's x been calculated
             FVDeclaration *next = [self nextSibling];
@@ -251,6 +258,12 @@
             }
             else{
                 [self assignHeight:FVF2R(h)];
+            }
+        }
+        else if (FVIsTail(h)){
+            NSAssert(self.parent, @"FVTail must has a valid parent, and its height already calcualted");
+            if(self.parent.heightCalculated){
+                [self assignHeight:self.parent.frame.size.height - FVFloat2Tail(h)];
             }
         }
         else if(FVIsFill(h)){
