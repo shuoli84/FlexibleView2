@@ -160,14 +160,6 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 @property (nonatomic, strong) UIView *object; //this is the object which this declaration owns
 
 /**
-* The block which will be called when there is no object available
-*
-* @warning: *note* if neither object nor objectCreationBlock exists, the library will create a default UIView with random
-* color. The random color indicates that you forget something and useful when just trouble shooting the layout issue.
-*/
-@property (nonatomic, copy) FVViewCreateBlock objectCreationBlock;
-
-/**
 * The context will be passed into the objectCreationBlock when create the object, useful for pass
 * some information
 */
@@ -186,6 +178,7 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 -(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration;
 -(void)removeFromParentDeclaration;
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock;
+-(FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock;
 
 -(FVDeclaration *)declarationByName:(NSString*)name;
 

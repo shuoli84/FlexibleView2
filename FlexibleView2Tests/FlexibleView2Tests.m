@@ -119,6 +119,20 @@ SPEC_BEGIN(DeclarationSpec)
                     [root assignFrame:CGRectMake(0, 0, 100, 100)];
                     UIView *v = [root loadView];
                 });
+
+                it(@"should support post process", ^{
+                    int __block flag = 0;
+                    FVDeclaration *declare = [[FVDeclaration declaration:@"test" frame:CGRectMake(0,0,0,0)] postProcess:^(FVDeclaration *declaration) {
+                        flag = 1;
+                    }];
+
+                    [[theValue(flag) should] equal:theValue(0)];
+
+                    [declare loadView];
+
+                    [[theValue(flag) should] equal:theValue(1)];
+
+                });
             });
         });
 SPEC_END

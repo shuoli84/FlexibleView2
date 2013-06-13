@@ -6,33 +6,7 @@
 //
 
 
-#import <CoreGraphics/CoreGraphics.h>
 #import "FVDeclaration.h"
-
-@interface WeakReferenceWrapper:NSObject
-@property (nonatomic,weak) NSObject* weakReference;
--(id)initWithReference:(NSObject *)reference;
-@end
-
-@implementation WeakReferenceWrapper
--(id)initWithReference:(NSObject *)reference {
-    self = [super init];
-    if(self){
-        typeof(reference) __weak weakRef = reference;
-        self.weakReference = weakRef;
-    }
-    return self;
-}
-
--(id)strongReference{
-    if(self.weakReference){
-        typeof(self.weakReference) __strong strongRef = self.weakReference;
-        return strongRef;
-    }
-
-    return nil;
-}
-@end
 
 @interface FVDeclaration()
 @property (nonatomic, assign) BOOL xCalculated;
@@ -45,11 +19,15 @@
 //all the subviews managed by sub declaration
 @property (nonatomic, strong) NSMutableArray *declareManagedSubview;
 
+@property (nonatomic, copy) FVDeclarationProcessBlock postProcessBlock;
+
 @end
 
 @implementation FVDeclaration
 @synthesize subDeclarations = _subDeclarations;
 @synthesize parent = _parent;
+
+@synthesize postProcessBlock = _postProcessBlock;
 
 -(id)init{
     if(self = [super init]){
@@ -419,6 +397,11 @@
         [view removeFromSuperview];
     }
 
+    // here is the chance to run post process
+    if(self.postProcessBlock){
+        self.postProcessBlock(self);
+    }
+
     return self.object;
 }
 
@@ -477,6 +460,11 @@
 
 -(void)removeFromParentDeclaration {
     [self.parent removeDeclaration:self];
-    self->_parent = nil;
+    _parent = nil;
+}
+
+- (FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock {
+    _postProcessBlock = processBlock;
+    return self;
 }
 @end
