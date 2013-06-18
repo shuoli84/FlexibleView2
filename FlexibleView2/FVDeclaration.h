@@ -43,6 +43,12 @@
 #define FVIsAuto(x) ((x)==FVAuto)
 
 /**
+* FVCenter automatic calculate the x based on width and parent width to make the view locate at center
+*/
+#define FVCenter 100003
+#define FVIsCenter(x) ((x)==FVCenter)
+
+/**
 *
 */
 #define FVPercentMin 110000

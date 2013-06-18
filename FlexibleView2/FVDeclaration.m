@@ -94,148 +94,20 @@
         self.unExpandedFrame = frame;
     }
 
-    if(!self.xCalculated){
-        CGFloat x = self.frame.origin.x;
-        if(FVIsNormal(x)){
-            self.xCalculated = YES;
-        }
-        else if(FVIsPercent(x)){
-            NSAssert(self.parent, @"For percent values, the parent must not be nil");
-            if(self.parent.widthCalculated){
-                [self assignX:self.parent.frame.size.width * FVF2P(x)];
-            }
-        }
-        else if(FVIsFill(x)){
-            NSAssert(!FVIsFill(x), @"x not support FVFill");
-        }
-        else if(FVIsAfter(x)){
-            NSAssert(self.parent, @"FVAfter must has a valid parent");
-            FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
-            if(prev){
-                if(prev.xCalculated){
-                    [self assignX: prev.frame.origin.x + prev.frame.size.width + FVFloat2After(x)];
-                }
-            }
-            else{
-                [self assignX:FVFloat2After(x)];
-            }
-        }
-        else if(FVIsTail(x)){
-            NSAssert(self.parent, @"FVTail must has a valid parent, and its width already calcualted");
-            if(self.parent.widthCalculated){
-                [self assignX: self.parent.frame.size.width - FVF2T(x)];
-            }
-        }
-        else if(FVIsRelated(x)){
-            NSAssert(self.parent, @"FVRelated must has a valid parent");
-            FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
-            if(prev && prev.xCalculated){
-                [self assignX: prev.frame.origin.x + FVF2R(x)];
-            }
-            else{
-                [self assignX:FVF2R(x)];
-            }
-        }
+    [self calculateX];
+
+    [self calculateWidth];
+
+    [self calculateY];
+
+    [self calculateHeight];
+
+    for(FVDeclaration *declaration in _subDeclarations){
+        [declaration calculateLayout];
     }
+}
 
-    if(!self.widthCalculated){
-        CGFloat w = self.frame.size.width;
-        if(FVIsNormal(w)){
-            self.widthCalculated = YES;
-        }
-        else if(FVIsPercent(w)){
-            if(self.parent && self.parent.widthCalculated){
-                [self assignWidth: self.parent.frame.size.width * FVF2P(w)];
-                self.widthCalculated = YES;
-            }
-        }
-        else if (FVIsRelated(w)){
-            FVDeclaration *prev = [self prevSibling];
-            if(prev && prev.widthCalculated){
-                [self assignWidth:prev.frame.size.width + FVF2R(w)];
-            }
-            else{
-                [self assignWidth:FVF2R(w)];
-            }
-        }
-        else if (FVIsTail(w)){
-            NSAssert(self.parent, @"FVTail must has a valid parent, and its width already calcualted");
-            if(self.parent.widthCalculated){
-                [self assignWidth:self.parent.frame.size.width - FVF2T(w)];
-            }
-        }
-        else if(FVIsFill(w)){
-            //Need the next x's x been calculated
-            FVDeclaration *next = [self nextSibling];
-            if (next) {
-                if(!next.xCalculated){
-                    [next calculateLayout];
-                }
-
-                if(next.xCalculated){
-                    [self assignWidth:next.frame.origin.x - self.frame.origin.x];
-                }
-            }
-            else{
-                [self assignWidth:self.parent.frame.size.width - self.frame.origin.x];
-            }
-        }
-        else if(FVIsAuto(w)){
-            if(_subDeclarations && _subDeclarations.count > 0){
-                CGFloat width = 0.0f;
-                for( FVDeclaration *declaration in _subDeclarations){
-                    if(!declaration.xCalculated && !declaration.widthCalculated){
-                        [declaration calculateLayout];
-                    }
-                    NSAssert(declaration.xCalculated && declaration.widthCalculated, @"Auto for w: sub declaration's x and width must be calculated");
-                    CGFloat right = declaration.frame.origin.x + declaration.frame.size.width;
-                    width = width > right ? width : right;
-                }
-                [self assignWidth:width];
-            }
-            else{
-                [self assignWidth:0];
-            }
-        }
-    }
-
-    if(!self.yCalculated){
-        CGFloat y = self.frame.origin.y;
-        if(FVIsNormal(y)){
-            self.yCalculated = YES;
-        }
-        else if(FVIsPercent(y)){
-            NSAssert(self.parent, @"Percent y: must have a parent");
-            if(self.parent.heightCalculated){
-                [self assignY:self.parent.frame.size.height * FVF2P(y)];
-            }
-        }
-        else if(FVIsAfter(y)){
-            if(self.parent){
-                FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
-                if(prev.yCalculated && prev.heightCalculated){
-                    [self assignY: prev.frame.origin.y + prev.frame.size.height + FVFloat2After(y)];
-                }
-            }
-        }
-        else if(FVIsTail(y)){
-            if(self.parent && self.parent.heightCalculated){
-                [self assignY:self.parent.frame.size.height - FVF2T(y)];
-            }
-        }
-        else if(FVIsRelated(y)){
-            if(self.parent){
-                FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
-                if(prev && prev.yCalculated){
-                    [self assignY: prev.frame.origin.y + FVF2R(y)];
-                }
-                else{
-                    [self assignY:FVF2R(y)];
-                }
-            }
-        }
-    }
-
+- (void)calculateHeight {
     if (!self.heightCalculated){
         CGFloat h = self.frame.size.height;
         if (FVIsNormal(h)){
@@ -299,9 +171,171 @@
             NSAssert(NO, @"Code should not hit this place");
         }
     }
+}
 
-    for(FVDeclaration *declaration in _subDeclarations){
-        [declaration calculateLayout];
+- (void)calculateY {
+    if(!self.yCalculated){
+        CGFloat y = self.frame.origin.y;
+        if(FVIsNormal(y)){
+            self.yCalculated = YES;
+        }
+        else if(FVIsPercent(y)){
+            NSAssert(self.parent, @"Percent y: must have a parent");
+            if(self.parent.heightCalculated){
+                [self assignY:self.parent.frame.size.height * FVF2P(y)];
+            }
+        }
+        else if(FVIsAfter(y)){
+            if(self.parent){
+                FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+                if(prev.yCalculated && prev.heightCalculated){
+                    [self assignY: prev.frame.origin.y + prev.frame.size.height + FVFloat2After(y)];
+                }
+            }
+        }
+        else if(FVIsTail(y)){
+            if(self.parent && self.parent.heightCalculated){
+                [self assignY:self.parent.frame.size.height - FVF2T(y)];
+            }
+        }
+        else if(FVIsRelated(y)){
+            if(self.parent){
+                FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+                if(prev && prev.yCalculated){
+                    [self assignY: prev.frame.origin.y + FVF2R(y)];
+                }
+                else{
+                    [self assignY:FVF2R(y)];
+                }
+            }
+        }
+        else if (FVIsCenter(y)){
+            NSAssert(self.parent && self.parent.heightCalculated, @"FVCenter must has a valid parent");
+            if(!self.heightCalculated){
+                [self calculateHeight];
+            }
+            NSAssert(self.heightCalculated, @"Height must be calcuated for FVCenter Y");
+            [self assignY:(self.parent.frame.size.height - self.frame.size.height)/2];
+        }
+    }
+}
+
+- (void)calculateWidth {
+    if(!self.widthCalculated){
+        CGFloat w = self.frame.size.width;
+        if(FVIsNormal(w)){
+            self.widthCalculated = YES;
+        }
+        else if(FVIsPercent(w)){
+            if(self.parent && self.parent.widthCalculated){
+                [self assignWidth: self.parent.frame.size.width * FVF2P(w)];
+                self.widthCalculated = YES;
+            }
+        }
+        else if (FVIsRelated(w)){
+            FVDeclaration *prev = [self prevSibling];
+            if(prev && prev.widthCalculated){
+                [self assignWidth:prev.frame.size.width + FVF2R(w)];
+            }
+            else{
+                [self assignWidth:FVF2R(w)];
+            }
+        }
+        else if (FVIsTail(w)){
+            NSAssert(self.parent, @"FVTail must has a valid parent, and its width already calcualted");
+            if(self.parent.widthCalculated){
+                [self assignWidth:self.parent.frame.size.width - FVF2T(w)];
+            }
+        }
+        else if(FVIsFill(w)){
+            //Need the next x's x been calculated
+            FVDeclaration *next = [self nextSibling];
+            if (next) {
+                if(!next.xCalculated){
+                    [next calculateLayout];
+                }
+
+                if(next.xCalculated){
+                    [self assignWidth:next.frame.origin.x - self.frame.origin.x];
+                }
+            }
+            else{
+                [self assignWidth:self.parent.frame.size.width - self.frame.origin.x];
+            }
+        }
+        else if(FVIsAuto(w)){
+            if(_subDeclarations && _subDeclarations.count > 0){
+                CGFloat width = 0.0f;
+                for( FVDeclaration *declaration in _subDeclarations){
+                    if(!declaration.xCalculated && !declaration.widthCalculated){
+                        [declaration calculateLayout];
+                    }
+                    NSAssert(declaration.xCalculated && declaration.widthCalculated, @"Auto for w: sub declaration's x and width must be calculated");
+                    CGFloat right = declaration.frame.origin.x + declaration.frame.size.width;
+                    width = width > right ? width : right;
+                }
+                [self assignWidth:width];
+            }
+            else{
+                [self assignWidth:0];
+            }
+        }
+    }
+}
+
+- (void)calculateX {
+    if(!self.xCalculated){
+        CGFloat x = self.frame.origin.x;
+        if(FVIsNormal(x)){
+            self.xCalculated = YES;
+        }
+        else if(FVIsPercent(x)){
+            NSAssert(self.parent, @"For percent values, the parent must not be nil");
+            if(self.parent.widthCalculated){
+                [self assignX:self.parent.frame.size.width * FVF2P(x)];
+            }
+        }
+        else if(FVIsFill(x)){
+            NSAssert(!FVIsFill(x), @"x not support FVFill");
+        }
+        else if(FVIsAfter(x)){
+            NSAssert(self.parent, @"FVAfter must has a valid parent");
+            FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+            if(prev){
+                if(prev.xCalculated){
+                    [self assignX: prev.frame.origin.x + prev.frame.size.width + FVFloat2After(x)];
+                }
+            }
+            else{
+                [self assignX:FVFloat2After(x)];
+            }
+        }
+        else if(FVIsTail(x)){
+            NSAssert(self.parent, @"FVTail must has a valid parent, and its width already calcualted");
+            if(self.parent.widthCalculated){
+                [self assignX: self.parent.frame.size.width - FVF2T(x)];
+            }
+        }
+        else if(FVIsRelated(x)){
+            NSAssert(self.parent, @"FVRelated must has a valid parent");
+            FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+            if(prev && prev.xCalculated){
+                [self assignX: prev.frame.origin.x + FVF2R(x)];
+            }
+            else{
+                [self assignX:FVF2R(x)];
+            }
+        }
+        else if(FVIsCenter(x)){
+            NSAssert(self.parent && self.parent.widthCalculated, @"FVCenter must has a valid parent");
+            //note: caution, if width needs x, and x needs width, dead lock occur
+            if(!self.widthCalculated){
+                [self calculateWidth];
+            }
+            NSAssert(self.widthCalculated, @"the width should be calcualted when FVCenter specified");
+
+            [self assignX: (self.parent.frame.size.width - self.frame.size.width)/2 ];
+        }
     }
 }
 
