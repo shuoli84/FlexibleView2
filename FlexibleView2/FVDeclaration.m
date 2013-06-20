@@ -186,11 +186,15 @@
             }
         }
         else if(FVIsAfter(y)){
-            if(self.parent){
-                FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+            NSAssert(self.parent, @"FVAfter must has a valid parent");
+            FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
+            if(prev){
                 if(prev.yCalculated && prev.heightCalculated){
                     [self assignY: prev.frame.origin.y + prev.frame.size.height + FVFloat2After(y)];
                 }
+            }
+            else{
+                [self assignY:FVFloat2After(y)];
             }
         }
         else if(FVIsTail(y)){
@@ -302,7 +306,7 @@
             NSAssert(self.parent, @"FVAfter must has a valid parent");
             FVDeclaration *prev = [self.parent prevSiblingOfChild:self];
             if(prev){
-                if(prev.xCalculated){
+                if(prev.xCalculated && prev.widthCalculated){
                     [self assignX: prev.frame.origin.x + prev.frame.size.width + FVFloat2After(x)];
                 }
             }
