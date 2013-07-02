@@ -169,6 +169,26 @@ SPEC_BEGIN(DeclarationSpec)
                     [[theValue(centerAutoWidth.frame.origin.y) should] equal:theValue(480)];
                     [[theValue(centerAutoWidth.frame.size.height) should] equal:theValue(40)];
                 });
+
+                it(@"should support autoTail calculation", ^{
+                    FVDeclaration *declaration = [FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)];
+                    [declaration withDeclarations:@[
+                        [FVDeclaration declaration:@"center" frame:F(FVAutoTail, FVAutoTail, 40, 40)],
+                        [[declare declaration:@"center-autowidth" frame:F(FVAutoTail, FVAutoTail, FVAuto, FVAuto)] withDeclarations:@[
+                            [declare declaration:@"sub1" frame:F(0, 0, 30, 30)],
+                            [declare declaration:@"sub2" frame:F(10, 10, 30, 30)],
+                        ]],
+                    ]];
+                    [declaration loadView];
+                    FVDeclaration *center = [declaration declarationByName:@"center"];
+                    [[theValue(center.frame.origin.x) should] equal:theValue(960)];
+                    [[theValue(center.frame.origin.y) should] equal:theValue(960)];
+                    declare* centerAutoWidth = [declaration declarationByName:@"center-autowidth"];
+                    [[theValue(centerAutoWidth.frame.origin.x) should] equal:theValue(960)];
+                    [[theValue(centerAutoWidth.frame.size.width) should] equal:theValue(40)];
+                    [[theValue(centerAutoWidth.frame.origin.y) should] equal:theValue(960)];
+                    [[theValue(centerAutoWidth.frame.size.height) should] equal:theValue(40)];
+                });
             });
         });
 SPEC_END

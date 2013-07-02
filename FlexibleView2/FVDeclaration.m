@@ -221,6 +221,14 @@
             NSAssert(self.heightCalculated, @"Height must be calcuated for FVCenter Y");
             [self assignY:(self.parent.frame.size.height - self.frame.size.height)/2];
         }
+        else if (FVIsAutoTail(y)){
+            NSAssert(self.parent && self.parent.heightCalculated, @"FVAutoTail must has a vlid parent");
+            if(!self.heightCalculated){
+                [self calculateHeight];
+            }
+            NSAssert(self.heightCalculated, @"Height must be calculated for FVAutoTail Y");
+            [self assignY:(self.parent.frame.size.height - self.frame.size.height)];
+        }
     }
 }
 
@@ -330,7 +338,7 @@
                 [self assignX:FVF2R(x)];
             }
         }
-        else if(FVIsCenter(x)){
+        else if(FVIsCenter(x) || FVIsAutoTail(x)){
             NSAssert(self.parent && self.parent.widthCalculated, @"FVCenter must has a valid parent");
             //note: caution, if width needs x, and x needs width, dead lock occur
             if(!self.widthCalculated){
@@ -338,7 +346,12 @@
             }
             NSAssert(self.widthCalculated, @"the width should be calcualted when FVCenter specified");
 
-            [self assignX: (self.parent.frame.size.width - self.frame.size.width)/2 ];
+            if(FVIsCenter(x)){
+                [self assignX: (self.parent.frame.size.width - self.frame.size.width)/2 ];
+            }
+            else if(FVIsAutoTail(x)){
+                [self assignX:(self.parent.frame.size.width - self.frame.size.width)];
+            }
         }
     }
 }

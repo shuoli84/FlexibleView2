@@ -49,6 +49,12 @@
 #define FVIsCenter(x) ((x)==FVCenter)
 
 /**
+* FVAutoTail automatic put the view at the end of parent based on its width or height.
+*/
+#define FVAutoTail 100004
+#define FVIsAutoTail(x) ((x)==FVAutoTail)
+
+/**
 *
 */
 #define FVPercentMin 110000
