@@ -171,17 +171,6 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 */
 @property (nonatomic, strong) UIView *object; //this is the object which this declaration owns
 
-/**
-* The context will be passed into the objectCreationBlock when create the object, useful for pass
-* some information
-*/
-@property (nonatomic, strong) NSDictionary *context;
-
-/**
-* The debug flag is not used in prod code, but useful in trouble shooting, set the flag and a conditional breakpoint helped
-*/
-@property (nonatomic) BOOL debug;
-
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
 
 -(FVDeclaration *)assignObject:(UIView*)object;

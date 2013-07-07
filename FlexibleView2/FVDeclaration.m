@@ -6,7 +6,6 @@
 //
 
 
-#import <CoreGraphics/CoreGraphics.h>
 #import "FVDeclaration.h"
 
 @interface FVDeclaration()
@@ -157,7 +156,7 @@
                 CGFloat height = 0.0f;
                 for(FVDeclaration *declaration in _subDeclarations){
                     [declaration calculateLayout];
-                    NSAssert(declaration.yCalculated && declaration.heightCalculated, @"FVAuto: y and height must calculated");
+                    NSAssert(declaration.yCalculated && declaration.heightCalculated, @"%@ FVAuto: y and height must calculated", self.name);
                     CGFloat bottom = declaration.frame.origin.y + declaration.frame.size.height;
                     height = height > bottom ? height : bottom;
                 }
@@ -222,7 +221,7 @@
             [self assignY:(self.parent.frame.size.height - self.frame.size.height)/2];
         }
         else if (FVIsAutoTail(y)){
-            NSAssert(self.parent && self.parent.heightCalculated, @"FVAutoTail must has a vlid parent");
+            NSAssert(self.parent && self.parent.heightCalculated, @"FVAutoTail must has a vlid parent and height been calculated");
             if(!self.heightCalculated){
                 [self calculateHeight];
             }
@@ -339,7 +338,7 @@
             }
         }
         else if(FVIsCenter(x) || FVIsAutoTail(x)){
-            NSAssert(self.parent && self.parent.widthCalculated, @"FVCenter must has a valid parent");
+            NSAssert(self.parent && self.parent.widthCalculated, @"FVCenter or FVAutoTail must has a valid parent and width calcluated");
             //note: caution, if width needs x, and x needs width, dead lock occur
             if(!self.widthCalculated){
                 [self calculateWidth];
