@@ -199,6 +199,13 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 */
 -(void)resetLayout;
 
+
+/**
+* In many cases, the layout just need to be reset on speicific ones, and reset all sub view is a overkill,
+* cause bad animation performance, depth is used to mitigate this
+*/
+-(void)resetLayoutWithDepth:(int)depth;
+
 /**
 * Get the layout calculation status
 *

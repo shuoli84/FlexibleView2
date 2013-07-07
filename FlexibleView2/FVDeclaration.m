@@ -435,11 +435,14 @@
         [self calculateLayout];
     }
 
-    if(!self.object){
-        self.object = [[UIView alloc] init];
-        self.object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
+    if(!_object){
+        _object = [[UIView alloc] init];
+        _object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
     }
-    self.object.frame = self.frame;
+
+    if(!CGRectEqualToRect(_object.frame, _frame)){
+        _object.frame = _frame;
+    }
 
     NSMutableArray *newManagedViews = [[NSMutableArray alloc] init];
     NSMutableArray *removedManagedViews = [NSMutableArray arrayWithArray:self.declareManagedSubview];
@@ -450,22 +453,22 @@
             [removedManagedViews removeObject:v];
         }
         else{
-            [self.object addSubview:v];
+            [_object addSubview:v];
         }
         [newManagedViews addObject:v];
     }
 
-    self.declareManagedSubview = newManagedViews;
+    _declareManagedSubview = newManagedViews;
     for (UIView *view in removedManagedViews){
         [view removeFromSuperview];
     }
 
     // here is the chance to run post process
-    if(self.postProcessBlock){
-        self.postProcessBlock(self);
+    if(_postProcessBlock){
+        _postProcessBlock(self);
     }
 
-    return self.object;
+    return _object;
 }
 
 -(FVDeclaration *)assignFrame:(CGRect)frame{
@@ -479,31 +482,43 @@
 }
 
 -(void)resetLayout {
-    // restore the frame to the original one, doing this will discard all the changes made
-    // So in order to update the frame, one should call reset layout first, then set new frame
-    CGRect originalFrame = self.frame;
-    if(_xCalculated){
-        originalFrame.origin.x = self.unExpandedFrame.origin.x;
-    }
-    if(_yCalculated){
-        originalFrame.origin.y = self.unExpandedFrame.origin.y;
-    }
-    if(_widthCalculated){
-        originalFrame.size.width = self.unExpandedFrame.size.width;
-    }
-    if(_heightCalculated){
-        originalFrame.size.height = self.unExpandedFrame.size.height;
-    }
+    [self resetLayoutWithDepth:INT32_MAX];
+}
 
-    _xCalculated = NO;
-    _yCalculated = NO;
-    _widthCalculated = NO;
-    _heightCalculated = NO;
 
-    self.frame = originalFrame;
+-(void)resetLayoutWithDepth:(int)depth {
+    if (depth <= 0){
+        return;
+    }
+    else if(depth >= 1){
+        // restore the frame to the original one, doing this will discard all the changes made
+        // So in order to update the frame, one should call reset layout first, then set new frame
+        CGRect originalFrame = self.frame;
+        if(_xCalculated){
+            originalFrame.origin.x = self.unExpandedFrame.origin.x;
+        }
+        if(_yCalculated){
+            originalFrame.origin.y = self.unExpandedFrame.origin.y;
+        }
+        if(_widthCalculated){
+            originalFrame.size.width = self.unExpandedFrame.size.width;
+        }
+        if(_heightCalculated){
+            originalFrame.size.height = self.unExpandedFrame.size.height;
+        }
 
-    for (FVDeclaration *declaration in _subDeclarations){
-        [declaration resetLayout];
+        _xCalculated = NO;
+        _yCalculated = NO;
+        _widthCalculated = NO;
+        _heightCalculated = NO;
+
+        self.frame = originalFrame;
+
+        if(depth > 1){
+            for (FVDeclaration *declaration in _subDeclarations){
+                [declaration resetLayoutWithDepth:depth-1];
+            }
+        }
     }
 }
 

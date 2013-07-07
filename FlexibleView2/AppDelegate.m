@@ -6,13 +6,11 @@
 //  Copyright (c) 2013 lishuo. All rights reserved.
 //
 
-#import <CoreGraphics/CoreGraphics.h>
 #import "AppDelegate.h"
 #import "DDLog.h"
 #import "DDASLLogger.h"
 #import "DDTTYLogger.h"
 #import "FVDeclaration.h"
-#import "UIControl+BlocksKit.h"
 #import <BlocksKit.h>
 @interface AppDelegate()
 @property (nonatomic, strong) FVDeclaration *root;
@@ -24,8 +22,8 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
     FVViewCreateBlock space = ^(NSDictionary *context){
-        UIView *space = [[UIView alloc] init];
-        return space;
+        UIView *sp = [[UIView alloc] init];
+        return sp;
     };
 
     FVDeclareTemplateBlock template = ^{
@@ -105,7 +103,6 @@
             NSMutableArray *array = [NSMutableArray array];
             for (int i = 0; i < 20; ++i) {
                 FVDeclaration *d = [FVDeclaration declaration:[NSString stringWithFormat:@"%d", i] frame:CGRectMake(FVP(0.05 * i), 0, FVP(0.05), FVP(1))];
-                d.debug = YES;
                 [array addObject:d];
             }
             return array;
