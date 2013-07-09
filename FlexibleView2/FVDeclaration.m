@@ -93,6 +93,9 @@
         self.unExpandedFrame = frame;
     }
 
+    // add sub declarations to refresh their parent node
+    [self withDeclarations:_subDeclarations];
+
     [self calculateX];
 
     [self calculateWidth];
