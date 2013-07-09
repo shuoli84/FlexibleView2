@@ -434,7 +434,7 @@
 }
 
 -(UIView*)loadView {
-    if (![self calculated:YES]){
+    if (![self calculated:NO]){
         [self calculateLayout];
     }
 
@@ -475,7 +475,7 @@
 }
 
 -(void)fillView:(UIView *)superView offsetFrame:(CGRect)frame{
-    if (![self calculated:YES]){
+    if (![self calculated:NO]){
         [self calculateLayout];
     }
     CGRect myFrame = CGRectOffset(_frame, frame.origin.x, frame.origin.y);
