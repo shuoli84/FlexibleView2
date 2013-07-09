@@ -192,6 +192,24 @@ SPEC_BEGIN(DeclarationSpec)
                     declare* sub2 = [declaration declarationByName:@"sub2"];
                     NSLog(@"%@", NSStringFromCGRect(sub2.object.frame));
                 });
+
+                it(@"should support z-index", ^{
+                    FVDeclaration *declaration = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] assignObject:[UIView new]];
+                    [declaration withDeclarations:@[
+                        [FVDeclaration declaration:@"center" frame:F(FVAutoTail, FVAutoTail, 40, 40)],
+                        [[declare declaration:@"center-autowidth" frame:F(FVAutoTail, FVAutoTail, FVAuto, FVAuto)] withDeclarations:@[
+                            [[declare declaration:@"sub1" frame:F(0, 0, 30, 30)] assignObject:[UIView new]],
+                            [[declare declaration:@"sub2" frame:F(10, 10, 30, 30) z:-1] assignObject:[UIView new]],
+                        ]],
+                    ]];
+                    [declaration fillView:nil offsetFrame:CGRectZero];
+                    UIView* sub1 = [declaration declarationByName:@"sub1"].object;
+                    UIView* sub2 = [declaration declarationByName:@"sub2"].object;
+
+                    UIView *superView = declaration.object;
+                    [[superView.subviews[0] should] equal:sub2];
+                    [[superView.subviews[1] should] equal:sub1];
+                });
             });
         });
 SPEC_END

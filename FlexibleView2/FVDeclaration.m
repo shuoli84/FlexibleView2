@@ -36,9 +36,14 @@
 }
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame {
+    return [FVDeclaration declaration:name frame:frame z:0];
+}
+
++(FVDeclaration *)declaration:(NSString *)name frame:(CGRect)frame z:(int)zIndex {
     FVDeclaration *declaration = [[FVDeclaration alloc]init];
     declaration.name = name;
     declaration.frame = frame;
+    declaration.zIndex = zIndex;
     return declaration;
 }
 
@@ -495,7 +500,15 @@
         subviewAddIntoView = _object;
     }
 
-    for(FVDeclaration *declaration in _subDeclarations){
+    NSArray *declarationOrdered = [_subDeclarations sortedArrayUsingComparator:^NSComparisonResult(FVDeclaration *obj1, FVDeclaration *obj2) {
+        int z1 = obj1->_zIndex;
+        int z2 = obj2->_zIndex;
+        if (z1==z2){ return NSOrderedSame;}
+        if (z1<z2){return NSOrderedAscending;}
+        return NSOrderedDescending;
+    }];
+
+    for(FVDeclaration *declaration in declarationOrdered){
         [declaration fillView:subviewAddIntoView offsetFrame:subviewBaseOnFrame];
     }
 
