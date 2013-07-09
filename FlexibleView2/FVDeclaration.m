@@ -483,9 +483,9 @@
         if(!CGRectEqualToRect(_object.frame, myFrame)){
             _object.frame = myFrame;
         }
-        if(_object.superview != superView){
-            [superView addSubview:_object];
-        }
+
+        [_object removeFromSuperview];
+        [superView addSubview:_object];
     }
 
     CGRect subviewBaseOnFrame = myFrame;
