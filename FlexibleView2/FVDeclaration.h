@@ -219,7 +219,22 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 *
 * @warning: *important* When get the view, it will give up the ownership to prevent cycle pointer.
 * From that point, declaration only holds a weak pointer for future usage.
+*
+* deprecated, use fillView:offsetFrame: instead
 */
--(UIView *)loadView;
+-(UIView *)loadView __deprecated;
+
+/**
+* New way to get fully setup view, it no longer require each declare has a UIView object, which helps to reduce the
+* memory and CPU used by the framework
+*
+* @param superView push the result into view
+* @param offset frame, declare will adjust its frame against the offset frame. Simply do a x1+x2, y1+y2. This is used
+*        when declare's object is nil, then sub declare needs to calculate their object's frame against the passed super
+*        view
+*
+* @warning: *important* this method no longer cleans old subview's, its developer's responsibility now
+*/
+-(void)fillView:(UIView *)superView offsetFrame:(CGRect)frame;
 @end
 

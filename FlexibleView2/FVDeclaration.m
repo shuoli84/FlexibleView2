@@ -474,6 +474,36 @@
     return _object;
 }
 
+-(void)fillView:(UIView *)superView offsetFrame:(CGRect)frame{
+    if (![self calculated:YES]){
+        [self calculateLayout];
+    }
+    CGRect myFrame = CGRectOffset(_frame, frame.origin.x, frame.origin.y);
+    if(superView != nil && _object != nil){
+        if(!CGRectEqualToRect(_object.frame, myFrame)){
+            _object.frame = myFrame;
+        }
+        if(_object.superview != superView){
+            [superView addSubview:_object];
+        }
+    }
+
+    CGRect subviewBaseOnFrame = myFrame;
+    UIView *subviewAddIntoView = superView;
+    if (_object){
+        subviewBaseOnFrame = CGRectZero;
+        subviewAddIntoView = _object;
+    }
+
+    for(FVDeclaration *declaration in _subDeclarations){
+        [declaration fillView:subviewAddIntoView offsetFrame:subviewBaseOnFrame];
+    }
+
+    if (_postProcessBlock){
+        _postProcessBlock(self);
+    }
+}
+
 -(FVDeclaration *)assignFrame:(CGRect)frame{
     self.frame = frame;
     return self;

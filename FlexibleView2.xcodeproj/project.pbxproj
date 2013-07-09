@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9B24C5F83AE6499BBE6649B9 /* libPods-FlexibleView2Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 989034407EE84D2F90612386 /* libPods-FlexibleView2Tests.a */; };
+		9C412175178C60C900B3F7F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48EC2EEC3BCE4BE7703616 /* CoreGraphics.framework */; };
 		BE48E06D3EEF06847D392D28 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BE48E8AEA2A20E469CAAB329 /* AppDelegate.m */; };
 		BE48E12901B9E2A8ED8113B0 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48EDDD1B3ABB3A2097588B /* SenTestingKit.framework */; };
 		BE48E232D21DCE91268ED787 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48E7053498884E90170B20 /* Foundation.framework */; };
@@ -79,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C412175178C60C900B3F7F5 /* CoreGraphics.framework in Frameworks */,
 				BE48E12901B9E2A8ED8113B0 /* SenTestingKit.framework in Frameworks */,
 				BE48ED26ECD40E3FD8F2FA3E /* UIKit.framework in Frameworks */,
 				BE48E232D21DCE91268ED787 /* Foundation.framework in Frameworks */,
