@@ -548,6 +548,7 @@
 
 -(void)removeFromParentDeclaration {
     [self.parent removeDeclaration:self];
+    [_object removeFromSuperview];
     _parent = nil;
 }
 
