@@ -439,43 +439,7 @@
 }
 
 -(UIView*)loadView {
-    if (![self calculated:NO]){
-        [self calculateLayout];
-    }
-
-    if(!_object){
-        _object = [[UIView alloc] init];
-        _object.backgroundColor = [UIColor colorWithRed:(arc4random()%255)/255.0f green:(arc4random()%255)/255.0 blue:(arc4random()%255)/255.0 alpha:0.8];
-    }
-
-    if(!CGRectEqualToRect(_object.frame, _frame)){
-        _object.frame = _frame;
-    }
-
-    NSMutableArray *newManagedViews = [[NSMutableArray alloc] init];
-    NSMutableArray *removedManagedViews = [NSMutableArray arrayWithArray:self.declareManagedSubview];
-    for(FVDeclaration *declaration in _subDeclarations){
-        UIView *v = [declaration loadView];
-        if([removedManagedViews indexOfObject:v] != NSNotFound){
-            //The view already been added, do nothing
-            [removedManagedViews removeObject:v];
-        }
-        else{
-            [_object addSubview:v];
-        }
-        [newManagedViews addObject:v];
-    }
-
-    _declareManagedSubview = newManagedViews;
-    for (UIView *view in removedManagedViews){
-        [view removeFromSuperview];
-    }
-
-    // here is the chance to run post process
-    if(_postProcessBlock){
-        _postProcessBlock(self);
-    }
-
+    [self fillView:nil offsetFrame:CGRectZero];
     return _object;
 }
 
