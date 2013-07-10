@@ -447,19 +447,20 @@
     if (![self calculated:NO]){
         [self calculateLayout];
     }
-    CGRect myFrame = CGRectOffset(_frame, frame.origin.x, frame.origin.y);
-    if(superView != nil && _object != nil){
-        if(!CGRectEqualToRect(_object.frame, myFrame)){
-            _object.frame = myFrame;
-        }
 
+    CGRect myFrame = CGRectOffset(_frame, frame.origin.x, frame.origin.y);
+    if(_object != nil && !CGRectEqualToRect(_object.frame, myFrame)){
+        _object.frame = myFrame;
+    }
+
+    if(superView != nil && _object != nil){
         [_object removeFromSuperview];
         [superView addSubview:_object];
     }
 
     CGRect subviewBaseOnFrame = myFrame;
     UIView *subviewAddIntoView = superView;
-    if (_object){
+    if (_object != nil){
         subviewBaseOnFrame = CGRectZero;
         subviewAddIntoView = _object;
     }
