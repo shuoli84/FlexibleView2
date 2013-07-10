@@ -212,6 +212,23 @@ SPEC_BEGIN(DeclarationSpec)
                     [[superView.subviews[0] should] equal:sub2];
                     [[superView.subviews[1] should] equal:sub1];
                 });
+
+                it(@"should support till end", ^{
+                    FVDeclaration *declaration = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] assignObject:[UIView new]];
+                    [declaration withDeclarations:@[
+                        [FVDeclaration declaration:@"tillEnd" frame:F(30, 30, FVTillEnd, FVTillEnd)],
+                        [[declare declaration:@"center-autowidth" frame:F(FVAutoTail, FVAutoTail, FVAuto, FVAuto)] withDeclarations:@[
+                            [[declare declaration:@"sub1" frame:F(0, 0, 30, 30)] assignObject:[UIView new]],
+                            [[declare declaration:@"sub2" frame:F(10, 10, 30, 30) z:-1] assignObject:[UIView new]],
+                        ]],
+                    ]];
+                    [declaration fillView:nil offsetFrame:CGRectZero];
+
+                    CGRect f = [declaration declarationByName:@"tillEnd"].frame;
+                    [[theValue(f.size.width) should] equal:theValue(970)];
+                    [[theValue(f.size.height) should] equal:theValue(970)];
+                });
+
                 it(@"should support autopilot", ^{
                     FVDeclaration *declaration = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] assignObject:[UIView new]];
                     [declaration withDeclarations:@[

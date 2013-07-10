@@ -55,6 +55,12 @@
 #define FVIsAutoTail(x) ((x)==FVAutoTail)
 
 /**
+* FVTillEnd set the view's width or height to fill the parent, no matter whether there is following views
+*/
+#define FVTillEnd 100005
+#define FVIsTillEnd(x) ((x)==FVTillEnd)
+
+/**
 *
 */
 #define FVPercentMin 110000

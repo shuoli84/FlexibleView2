@@ -174,6 +174,11 @@
                 [self assignHeight:0];
             }
         }
+        else if (FVIsTillEnd(h)){
+            NSAssert(_parent && _parent->_heightCalculated, @"Height TillEnd requires a valid parent and its height already calculated");
+            NSAssert(_yCalculated, @"Height TillEnd requires y calculated");
+            [self assignHeight:_parent->_frame.size.height - _frame.origin.y];
+        }
         else{
             NSAssert(NO, @"Code should not hit this place");
         }
@@ -298,6 +303,11 @@
             else{
                 [self assignWidth:0];
             }
+        }
+        else if (FVIsTillEnd(w)){
+            NSAssert(_parent && _parent->_widthCalculated, @"TillEnd requires a valid parent and its width calculated");
+            NSAssert(_xCalculated, @"TillEnd requires x already calculated");
+            [self assignWidth:_parent->_frame.size.width - _frame.origin.x];
         }
     }
 }
