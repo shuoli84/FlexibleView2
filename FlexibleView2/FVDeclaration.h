@@ -235,12 +235,25 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 * memory and CPU used by the framework
 *
 * @param superView push the result into view
-* @param offset frame, declare will adjust its frame against the offset frame. Simply do a x1+x2, y1+y2. This is used
-*        when declare's object is nil, then sub declare needs to calculate their object's frame against the passed super
-*        view
 *
 * @warning: *important* this method no longer cleans old subview's, its developer's responsibility now
 */
--(void)fillView:(UIView *)superView offsetFrame:(CGRect)frame;
+-(void)fillView:(UIView *)superView;
+
+/**
+* UpdateViewFrame will only update view's frame based on calculated result, it will not refresh the view tree. This is
+* a power user api, which should be used when you know what you are doing.
+*
+* If the declare tree changed but view tree not, then call this api may result strange layout. It should be used in situations
+* that view tree and declare tree is sync, either they are maintained by declare tree or the client's code synced them, add
+* a declare node and also add the node's object into its parent's view.
+*
+* They reason why we have this code is for performance consideration, remove all views and re add them cause the whole screen
+* updated, which caused bad animation performance.
+*
+* @warning: *note* this will also call postProcess block
+*/
+-(void)updateViewFrame;
+
 @end
 

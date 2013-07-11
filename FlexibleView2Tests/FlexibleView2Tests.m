@@ -11,6 +11,16 @@
 #import "Kiwi.h"
 #import "NSObject+BlockObservation.h"
 
+@interface DebugView : UIView
+@property (nonatomic, copy) void (^didAddSubviewBlock)(UIView* view, UIView* subview);
+@end
+
+@implementation DebugView
+-(void)didAddSubview:(UIView *)subview {
+    self.didAddSubviewBlock(self, subview);
+}
+@end
+
 SPEC_BEGIN(DeclarationSpec)
         describe(@"Declaration", ^{
             context(@"Position calculation", ^{
@@ -181,7 +191,7 @@ SPEC_BEGIN(DeclarationSpec)
                             [[declare declaration:@"sub2" frame:F(10, 10, 30, 30)] assignObject:[UIView new]],
                         ]],
                     ]];
-                    [declaration fillView:nil offsetFrame:CGRectZero];
+                    [declaration fillView:nil];
                     FVDeclaration *center = [declaration declarationByName:@"center"];
                     [[theValue(center.frame.origin.x) should] equal:theValue(960)];
                     [[theValue(center.frame.origin.y) should] equal:theValue(960)];
@@ -203,11 +213,38 @@ SPEC_BEGIN(DeclarationSpec)
                             [[declare declaration:@"sub1" frame:F(0, 0, 30, 30)] assignObject:[UIView new]],
                         ]],
                     ]];
-                    [declaration fillView:nil offsetFrame:CGRectZero];
+                    [declaration fillView:nil];
 
                     CGRect f = [declaration declarationByName:@"tillEnd"].frame;
                     [[theValue(f.size.width) should] equal:theValue(970)];
                     [[theValue(f.size.height) should] equal:theValue(970)];
+                });
+
+                it(@"should support update view frame", ^{
+                    FVDeclaration *declaration = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] assignObject:[DebugView new]];
+                    [declaration withDeclarations:@[
+                        [FVDeclaration declaration:@"tillEnd" frame:F(30, 30, FVTillEnd, FVTillEnd)],
+                        [[declare declaration:@"center-autowidth" frame:F(FVAutoTail, FVAutoTail, FVAuto, FVAuto)] withDeclarations:@[
+                            [[declare declaration:@"sub1" frame:F(0, 0, 30, 30)] assignObject:[UIView new]],
+                        ]],
+                    ]];
+                    DebugView* dv = (DebugView*)declaration.object;
+                    BOOL __block called = NO;
+                    dv.didAddSubviewBlock = ^(UIView *view, UIView *subview){
+                        called = YES;
+                    };
+
+                    [declaration fillView:nil];
+
+                    [[theValue(called) should] beYes];
+                    called = NO;
+
+                    [declaration resetLayout];
+                    [declaration declarationByName:@"sub1"].frame = F(0, 0, 50, 50);
+                    [declaration updateViewFrame];
+
+                    NSLog(@"%@", NSStringFromCGRect([declaration declarationByName:@"sub1"].object.frame));
+                    [[theValue(called) should] beNo];
                 });
 
                 it(@"should support autopilot", ^{
@@ -219,7 +256,7 @@ SPEC_BEGIN(DeclarationSpec)
                         ]],
                     ]];
 
-                    [declaration fillView:nil offsetFrame:CGRectZero];
+                    [declaration fillView:nil];
                     UIView* sub1 = [declaration declarationByName:@"sub1"].object;
                     UIView* sub2 = [declaration declarationByName:@"sub2"].object;
 
@@ -228,7 +265,7 @@ SPEC_BEGIN(DeclarationSpec)
                     [superView addObserverForKeyPaths:@[@"frame", @"bounds"] task:^(id obj, NSString *keyPath) {
                         [declaration resetLayout];
                         declaration.frame = [obj frame];
-                        [declaration fillView:nil offsetFrame:CGRectZero];
+                        [declaration fillView:nil];
                     }];
 
                     superView.frame = F(0, 0, 2000, 2000);

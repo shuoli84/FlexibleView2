@@ -444,40 +444,59 @@
 }
 
 -(UIView*)loadView {
-    [self fillView:nil offsetFrame:CGRectZero];
+    [self fillView:nil];
     return _object;
 }
 
--(void)fillView:(UIView *)superView offsetFrame:(CGRect)frame{
-    if (![self calculated:NO]){
-        [self calculateLayout];
-    }
+-(void)fillView:(UIView *)superView{
+    [self updateViewFrameInternalWithOffsetFrame:CGRectZero];
+    [self setupViewTreeInto:superView];
+}
 
-    CGRect myFrame = CGRectOffset(_frame, frame.origin.x, frame.origin.y);
-    if(_object != nil && !CGRectEqualToRect(_object.frame, myFrame)){
-        _object.frame = myFrame;
-    }
-
+-(void)setupViewTreeInto:(UIView *)superView{
     if(superView != nil && _object != nil){
         [_object removeFromSuperview];
         [superView addSubview:_object];
     }
 
-    CGRect subviewBaseOnFrame = myFrame;
     UIView *subviewAddIntoView = superView;
     if (_object != nil){
-        subviewBaseOnFrame = CGRectZero;
         subviewAddIntoView = _object;
     }
 
     for(FVDeclaration *declaration in _subDeclarations){
-        [declaration fillView:subviewAddIntoView offsetFrame:subviewBaseOnFrame];
+        [declaration setupViewTreeInto:subviewAddIntoView];
+    }
+}
+
+-(void)updateViewFrame{
+    [self updateViewFrameInternalWithOffsetFrame:CGRectZero];
+}
+
+-(void)updateViewFrameInternalWithOffsetFrame:(CGRect)offsetFrame{
+    if (![self calculated:NO]){
+        [self calculateLayout];
+    }
+
+    CGRect myFrame = CGRectOffset(_frame, offsetFrame.origin.x, offsetFrame.origin.y);
+
+    if(_object != nil && !CGRectEqualToRect(_object.frame, myFrame)){
+        _object.frame = myFrame;
+    }
+
+    CGRect subviewBaseOnFrame = myFrame;
+    if (_object != nil){
+        subviewBaseOnFrame = CGRectZero;
+    }
+    for(FVDeclaration *declaration in _subDeclarations){
+        [declaration updateViewFrameInternalWithOffsetFrame:subviewBaseOnFrame];
     }
 
     if (_postProcessBlock){
         _postProcessBlock(self);
     }
 }
+
 
 -(FVDeclaration *)assignFrame:(CGRect)frame{
     self.frame = frame;
