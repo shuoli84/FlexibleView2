@@ -16,18 +16,12 @@
 
 @property (nonatomic, assign) CGRect unExpandedFrame; // this is the original frame which not expanded.
 
-//all the subviews managed by sub declaration
-@property (nonatomic, strong) NSMutableArray *declareManagedSubview;
-
-@property (nonatomic, copy) FVDeclarationProcessBlock postProcessBlock;
-
+@property (nonatomic, strong) NSMutableArray *postProcessBlocks;
 @end
 
 @implementation FVDeclaration
 @synthesize subDeclarations = _subDeclarations;
 @synthesize parent = _parent;
-
-@synthesize postProcessBlock = _postProcessBlock;
 
 -(id)init{
     if(self = [super init]){
@@ -492,8 +486,8 @@
         [declaration updateViewFrameInternalWithOffsetFrame:subviewBaseOnFrame];
     }
 
-    if (_postProcessBlock){
-        _postProcessBlock(self);
+    for(FVDeclarationProcessBlock block in _postProcessBlocks){
+        block(self);
     }
 }
 
@@ -570,7 +564,10 @@
 }
 
 - (FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock {
-    _postProcessBlock = processBlock;
+    if(_postProcessBlocks == nil){
+        _postProcessBlocks = [NSMutableArray array];
+    }
+    [_postProcessBlocks addObject:[processBlock copy]];
     return self;
 }
 @end
