@@ -177,15 +177,7 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 */
 @property (nonatomic, strong) UIView *object; //this is the object which this declaration owns
 
-/**
-* The z-order, it is used to calculate the view's z order (The order for addSubview).
-*
-* The position calculation is not affected by z order
-*/
-@property (nonatomic, assign) int zIndex;
-
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
-+(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame z:(int)zIndex;
 
 -(FVDeclaration *)assignObject:(UIView*)object;
 -(FVDeclaration *)assignFrame:(CGRect)frame;
