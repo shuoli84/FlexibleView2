@@ -7,26 +7,49 @@
 
 
 #import "FVDeclaration.h"
+#import "NSArray+BlocksKit.h"
 
 @interface FVDeclaration()
+
+
 @property (nonatomic, assign) BOOL xCalculated;
 @property (nonatomic, assign) BOOL yCalculated;
 @property (nonatomic, assign) BOOL widthCalculated;
 @property (nonatomic, assign) BOOL heightCalculated;
-
 @property (nonatomic, assign) CGRect unExpandedFrame; // this is the original frame which not expanded.
-
 @property (nonatomic, strong) NSMutableArray *postProcessBlocks;
 @end
 
-@implementation FVDeclaration
-@synthesize subDeclarations = _subDeclarations;
+@implementation FVDeclaration{
+    NSMutableArray *_subDeclarations;
+}
 @synthesize parent = _parent;
 
 -(id)init{
     if(self = [super init]){
     }
     return self;
+}
+
+-(id)copyWithZone:(NSZone *)zone
+{
+    FVDeclaration *dec = [[FVDeclaration alloc] init];
+    dec.frame = _frame;
+    dec.name = [_name copy];
+    dec.postProcessBlocks = [_postProcessBlocks copy];
+    dec.object = _object; //Object is shared even in copied declare.
+
+    dec->_xCalculated = _xCalculated;
+    dec->_yCalculated = _yCalculated;
+    dec->_widthCalculated = _widthCalculated;
+    dec->_heightCalculated = _heightCalculated;
+    dec->_unExpandedFrame = _unExpandedFrame;
+
+    dec->_subDeclarations = [NSMutableArray arrayWithCapacity:_subDeclarations.count];
+    [_subDeclarations each:^(FVDeclaration* d) {
+        [dec appendDeclaration:[d copyWithZone:zone]];
+    }];
+    return dec;
 }
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame {
@@ -47,6 +70,10 @@
         ((FVDeclaration *)obj)->_parent = self;
     }];
     return self;
+}
+
+-(NSArray *)subDeclarations {
+    return _subDeclarations;
 }
 
 -(FVDeclaration *)declarationByName:(NSString *)name {
@@ -544,17 +571,13 @@
 }
 
 -(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration {
-    NSMutableArray *subDeclarations = [NSMutableArray arrayWithArray:_subDeclarations];
-    [subDeclarations addObject:declaration];
-    _subDeclarations = subDeclarations;
+    [_subDeclarations addObject:declaration];
     declaration->_parent = self;
     return self;
 }
 
 -(void)removeDeclaration:(FVDeclaration*)declaration{
-    NSMutableArray *array = [NSMutableArray arrayWithArray:_subDeclarations];
-    [array removeObject:declaration];
-    _subDeclarations = array;
+    [_subDeclarations removeObject:declaration];
 }
 
 -(void)removeFromParentDeclaration {

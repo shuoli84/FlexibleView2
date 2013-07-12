@@ -276,6 +276,12 @@ SPEC_BEGIN(DeclarationSpec)
                     superView.frame = F(0, 0, 500, 500);
                     NSLog(@"frame of sub2 change to %@", NSStringFromCGRect(sub2.frame));
                 });
+                it(@"should support deep copy", ^{
+                    declare* rootCopy = [root copy];
+
+                    [[root.name should] equal:rootCopy.name];
+                    [[theValue(root.subDeclarations.count) should] equal:theValue(rootCopy.subDeclarations.count)];
+                });
             });
         });
 SPEC_END
