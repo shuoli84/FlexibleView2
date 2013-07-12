@@ -149,7 +149,7 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 * this loadView's info, otherwise, a dependency loop detected and error return
 */
 
-@interface FVDeclaration : NSObject
+@interface FVDeclaration : NSObject <NSCopying>
 
 /**
 * The name of the node, it can be used to retrieve the node from the node tree
