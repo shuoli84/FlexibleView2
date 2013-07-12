@@ -571,6 +571,9 @@
 }
 
 -(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration {
+    if(_subDeclarations == nil){
+        _subDeclarations = [NSMutableArray array];
+    }
     [_subDeclarations addObject:declaration];
     declaration->_parent = self;
     return self;
