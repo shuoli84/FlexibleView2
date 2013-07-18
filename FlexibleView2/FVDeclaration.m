@@ -470,7 +470,7 @@
 }
 
 -(void)fillView:(UIView *)superView{
-    [self updateViewFrameInternalWithOffsetFrame:CGRectZero];
+    [self updateViewFrame];
     [self setupViewTreeInto:superView];
 }
 
@@ -491,7 +491,17 @@
 }
 
 -(void)updateViewFrame{
-    [self updateViewFrameInternalWithOffsetFrame:CGRectZero];
+    //Find this node's offset frame
+    CGPoint offsetPoint = CGPointZero;
+    FVDeclaration *dec = _parent;
+    while(dec && dec.object == nil){
+        NSAssert([dec calculated:NO], @"The parent's layout has to be calculated when call updateView frame in sub declaration");
+        offsetPoint.x += dec.frame.origin.x;
+        offsetPoint.y += dec.frame.origin.y;
+        dec = dec.parent;
+    }
+
+    [self updateViewFrameInternalWithOffsetFrame:CGRectMake(offsetPoint.x, offsetPoint.y, 0, 0)];
 }
 
 -(void)updateViewFrameInternalWithOffsetFrame:(CGRect)offsetFrame{

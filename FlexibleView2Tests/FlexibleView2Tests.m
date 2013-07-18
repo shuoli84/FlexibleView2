@@ -282,6 +282,37 @@ SPEC_BEGIN(DeclarationSpec)
                     [[root.name should] equal:rootCopy.name];
                     [[theValue(root.subDeclarations.count) should] equal:theValue(rootCopy.subDeclarations.count)];
                 });
+
+                it(@"should able to updateviewframe even itself is a virtual node", ^{
+                    declare* d = [declare declaration:@"root" frame:F(0, 0, 1000, 1000)];
+                    [d withDeclarations:@[
+                        [[declare declaration:@"p1" frame:F(FVP(0.5), FVP(0.5), FVP(0.5), FVP(0.5))] withDeclarations:@[
+                            [[declare declaration:@"p2" frame:F(FVA(10), FVA(10), FVTillEnd, FVTillEnd)] withDeclarations:@[
+                                [[declare declaration:@"v" frame:F(FVA(10), FVA(10), FVTillEnd, FVTillEnd)] assignObject:[UIView new]]
+                            ]]
+                        ]]
+                    ]];
+
+                    UIView *view = [[UIView alloc]init];
+                    view.frame = F(0, 0, 1000, 1000);
+
+                    [d fillView:view];
+                    NSString *str1 = NSStringFromCGRect([[view.subviews lastObject] frame]);
+
+                    declare* d1 = [d declarationByName:@"v"];
+                    [d1 resetLayout];
+                    [d1 updateViewFrame];
+
+                    NSString *str2 = NSStringFromCGRect([[view.subviews lastObject] frame]);
+
+                    [d1 resetLayout];
+                    [d1 fillView:nil];
+
+                    NSString *str3 = NSStringFromCGRect([[view.subviews lastObject] frame]);
+
+                    [[str1 should] equal:str2];
+                    [[str1 should] equal:str3];
+                });
             });
         });
 SPEC_END
