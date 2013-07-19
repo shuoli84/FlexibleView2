@@ -154,12 +154,12 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 /**
 * The name of the node, it can be used to retrieve the node from the node tree
 */
-@property (nonatomic,strong) NSString* name;
+@property (nonatomic, strong) NSString* name;
 
 /**
 * The frame of the node, it may contain all the magic values, and when calculate layout, they will be translated
 */
-@property (nonatomic) CGRect frame;
+@property (nonatomic, assign) CGRect frame;
 
 /**
 * The sub nodes if any
