@@ -11,13 +11,13 @@
 
 @interface FVDeclaration()
 
-
 @property (nonatomic, assign) BOOL xCalculated;
 @property (nonatomic, assign) BOOL yCalculated;
 @property (nonatomic, assign) BOOL widthCalculated;
 @property (nonatomic, assign) BOOL heightCalculated;
 @property (nonatomic, assign) CGRect unExpandedFrame; // this is the original frame which not expanded.
 @property (nonatomic, strong) NSMutableArray *postProcessBlocks;
+
 @end
 
 @implementation FVDeclaration{
@@ -55,7 +55,7 @@
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame {
     FVDeclaration *declaration = [[FVDeclaration alloc]init];
     declaration->_name = name;
-    declaration->_frame = frame;
+    declaration->_unExpandedFrame = frame;
     return declaration;
 }
 
@@ -93,37 +93,17 @@
 }
 
 -(void)calculateLayout {
-    if (!_xCalculated){
-        CGRect frame = _unExpandedFrame;
-        frame.origin.x = _frame.origin.x;
-        _unExpandedFrame = frame;
-    }
-    if (!_yCalculated){
-        CGRect frame = _unExpandedFrame;
-        frame.origin.y = _frame.origin.y;
-        _unExpandedFrame = frame;
-    }
-    if (!_widthCalculated){
-        CGRect frame = _unExpandedFrame;
-        frame.size.width = _frame.size.width;
-        _unExpandedFrame = frame;
-    }
-    if (!_heightCalculated){
-        CGRect frame = _unExpandedFrame;
-        frame.size.height = _frame.size.height;
-        _unExpandedFrame = frame;
-    }
-
     // add sub declarations to refresh their parent node
     [self withDeclarations:_subDeclarations];
 
-    [self calculateX];
+    if(![self calculated:NO]){
+        _frame = _unExpandedFrame;
 
-    [self calculateWidth];
-
-    [self calculateY];
-
-    [self calculateHeight];
+        [self calculateX];
+        [self calculateWidth];
+        [self calculateY];
+        [self calculateHeight];
+    }
 
     for(FVDeclaration *declaration in _subDeclarations){
         [declaration calculateLayout];
@@ -534,8 +514,13 @@
 }
 
 -(FVDeclaration *)assignFrame:(CGRect)frame{
-    _frame = frame;
+    self.frame = frame;
     return self;
+}
+
+-(void)setFrame:(CGRect)frame{
+    [self resetLayout];
+    _unExpandedFrame = frame;
 }
 
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock {
@@ -555,26 +540,10 @@
     else if(depth >= 1){
         // restore the frame to the original one, doing this will discard all the changes made
         // So in order to update the frame, one should call reset layout first, then set new frame
-        CGRect originalFrame = _frame;
-        if(_xCalculated){
-            originalFrame.origin.x = _unExpandedFrame.origin.x;
-        }
-        if(_yCalculated){
-            originalFrame.origin.y = _unExpandedFrame.origin.y;
-        }
-        if(_widthCalculated){
-            originalFrame.size.width = _unExpandedFrame.size.width;
-        }
-        if(_heightCalculated){
-            originalFrame.size.height = _unExpandedFrame.size.height;
-        }
-
         _xCalculated = NO;
         _yCalculated = NO;
         _widthCalculated = NO;
         _heightCalculated = NO;
-
-        _frame = originalFrame;
 
         if(depth > 1){
             for (FVDeclaration *declaration in _subDeclarations){

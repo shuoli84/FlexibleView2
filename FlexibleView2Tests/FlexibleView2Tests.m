@@ -83,9 +83,7 @@ SPEC_BEGIN(DeclarationSpec)
                 });
 
                 it(@"should able to accept absolute values", ^{
-                    NSError* error;
                     [root calculateLayout];
-                    [error shouldBeNil];
                     [[theValue(root.frame.origin.x) should] equal:theValue(0)];
                     [[theValue(root.frame.size.width) should] equal:theValue(1000)];
 
@@ -248,7 +246,7 @@ SPEC_BEGIN(DeclarationSpec)
                 });
 
                 it(@"should support autopilot", ^{
-                    FVDeclaration *declaration = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)] assignObject:[UIView new]];
+                    FVDeclaration *declaration = [FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, 1000, 1000)];
                     [declaration withDeclarations:@[
                         [FVDeclaration declaration:@"center" frame:F(FVAutoTail, FVAutoTail, 40, 40)],
                         [[declare declaration:@"center-autowidth" frame:F(FVAutoTail, FVAutoTail, FVAuto, FVAuto)] withDeclarations:@[
@@ -260,12 +258,13 @@ SPEC_BEGIN(DeclarationSpec)
                     UIView* sub1 = [declaration declarationByName:@"sub1"].object;
                     UIView* sub2 = [declaration declarationByName:@"sub2"].object;
 
-                    UIView *superView = declaration.object;
+                    UIView *superView = [UIView new];
+                    superView.frame = F(0, 0, 1000, 1000);
 
                     [superView addObserverForKeyPaths:@[@"frame", @"bounds"] task:^(id obj, NSString *keyPath) {
                         [declaration resetLayout];
-                        declaration.frame = [obj frame];
-                        [declaration fillView:nil];
+                        declaration.frame = [obj bounds];
+                        [declaration fillView:obj];
                     }];
 
                     superView.frame = F(0, 0, 2000, 2000);
