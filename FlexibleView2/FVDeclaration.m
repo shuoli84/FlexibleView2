@@ -470,7 +470,12 @@
 }
 
 -(void)fillView:(UIView *)superView{
-    [self updateViewFrame];
+    FVDeclaration *wrapperDeclare = self;
+    if(superView){
+        wrapperDeclare = [FVDeclaration declaration:@"wrapper" frame:superView.bounds];
+        [wrapperDeclare appendDeclaration:self];
+    }
+    [wrapperDeclare updateViewFrame];
     [self setupViewTreeInto:superView];
 }
 

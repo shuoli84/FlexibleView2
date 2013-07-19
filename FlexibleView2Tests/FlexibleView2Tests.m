@@ -313,6 +313,16 @@ SPEC_BEGIN(DeclarationSpec)
                     [[str1 should] equal:str2];
                     [[str1 should] equal:str3];
                 });
+
+                it(@"should support direct fill into view", ^{
+                    declare* d = [[declare declaration:@"v" frame:F(FVP(0.5), 10, 20, 20)] assignObject:[UIView new]];
+                    UIView *v = [UIView new];
+                    v.frame = F(0, 0, 1000, 1000);
+                    [d fillView:v];
+
+                    [[theValue(d.object.frame.origin.x == 500) should] beTrue];
+                    [[theValue(d.object.frame.origin.y == 10) should] beTrue];
+                });
             });
         });
 SPEC_END
