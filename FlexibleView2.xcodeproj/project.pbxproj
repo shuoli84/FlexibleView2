@@ -11,6 +11,7 @@
 		9C412175178C60C900B3F7F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48EC2EEC3BCE4BE7703616 /* CoreGraphics.framework */; };
 		BE48E06D3EEF06847D392D28 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BE48E8AEA2A20E469CAAB329 /* AppDelegate.m */; };
 		BE48E12901B9E2A8ED8113B0 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48EDDD1B3ABB3A2097588B /* SenTestingKit.framework */; };
+		BE48E13F275D1C8099C5CE54 /* FVDeclareHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BE48EC53EA8A050B218F1412 /* FVDeclareHelper.m */; };
 		BE48E232D21DCE91268ED787 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE48E7053498884E90170B20 /* Foundation.framework */; };
 		BE48E41743AA34A407864B84 /* FlexibleView2Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BE48EC97D74105C814B9716A /* FlexibleView2Tests.m */; };
 		BE48E422E8D20BAFCD62031D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BE48E8968F29473B8B15D5B3 /* InfoPlist.strings */; };
@@ -42,6 +43,7 @@
 		BE48E096D0FA68BBDB1C0559 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BE48E1D80869B3E92EF0B3F2 /* FlexibleView2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = "FlexibleView2-Info.plist"; sourceTree = "<group>"; };
 		BE48E4A8AB6B1CB53D331B55 /* FlexibleView2Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = "FlexibleView2Tests-Info.plist"; sourceTree = "<group>"; };
+		BE48E4DA261A49BD5404ABC3 /* FVDeclareHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVDeclareHelper.h; sourceTree = "<group>"; };
 		BE48E54BC0B9A06BD5DDE4C9 /* FlexibleView2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlexibleView2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE48E5CB4A84A8C60E3AE0C4 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		BE48E64E7464758D0E8C0C38 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 		BE48E9CE8E2A159F6B78EC56 /* FVDeclaration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVDeclaration.m; sourceTree = "<group>"; };
 		BE48EBD1DEFA9888EFD6C2B3 /* FVDeclaration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVDeclaration.h; sourceTree = "<group>"; };
 		BE48EC2EEC3BCE4BE7703616 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		BE48EC53EA8A050B218F1412 /* FVDeclareHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVDeclareHelper.m; sourceTree = "<group>"; };
 		BE48EC97D74105C814B9716A /* FlexibleView2Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlexibleView2Tests.m; sourceTree = "<group>"; };
 		BE48ED22FAE74B304DD1A225 /* FlexibleView2Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlexibleView2Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE48EDDD1B3ABB3A2097588B /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -135,6 +138,8 @@
 				BE48E8AEA2A20E469CAAB329 /* AppDelegate.m */,
 				BE48EBD1DEFA9888EFD6C2B3 /* FVDeclaration.h */,
 				BE48E9CE8E2A159F6B78EC56 /* FVDeclaration.m */,
+				BE48EC53EA8A050B218F1412 /* FVDeclareHelper.m */,
+				BE48E4DA261A49BD5404ABC3 /* FVDeclareHelper.h */,
 			);
 			path = FlexibleView2;
 			sourceTree = "<group>";
@@ -362,6 +367,7 @@
 				BE48E79004A8ADAC611C6BB7 /* main.m in Sources */,
 				BE48E06D3EEF06847D392D28 /* AppDelegate.m in Sources */,
 				BE48E9B85F98ACE3207E8FD6 /* FVDeclaration.m in Sources */,
+				BE48E13F275D1C8099C5CE54 /* FVDeclareHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,6 +409,7 @@
 				GCC_PREFIX_HEADER = "FlexibleView2/FlexibleView2-Prefix.pch";
 				INFOPLIST_FILE = "FlexibleView2/FlexibleView2-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "\"${PROJECT_DIR}/Pods\"/**";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -476,6 +483,7 @@
 				GCC_PREFIX_HEADER = "FlexibleView2/FlexibleView2-Prefix.pch";
 				INFOPLIST_FILE = "FlexibleView2/FlexibleView2-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "\"${PROJECT_DIR}/Pods\"/**";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;

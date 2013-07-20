@@ -11,6 +11,7 @@
 #import "DDASLLogger.h"
 #import "DDTTYLogger.h"
 #import "FVDeclaration.h"
+#import "FVDeclareHelper.h"
 #import <BlocksKit.h>
 @interface AppDelegate()
 @property (nonatomic, strong) FVDeclaration *root;

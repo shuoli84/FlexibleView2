@@ -157,11 +157,6 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 @property (nonatomic, strong) NSString* name;
 
 /**
-* The frame of the node, it may contain all the magic values, and when calculate layout, they will be translated
-*/
-@property (nonatomic, assign) CGRect frame;
-
-/**
 * The sub nodes if any
 */
 @property (nonatomic, readonly) NSArray *subDeclarations;
@@ -179,10 +174,26 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
 
+-(void)setFrame:(CGRect)frame __deprecated;
+-(CGRect)frame __deprecated;
+-(CGRect)expandedFrame;
+
+-(void)setUnExpandedFrame:(CGRect)unExpandedFrame;
+-(CGRect)unExpandedFrame;
+
 -(FVDeclaration *)assignObject:(UIView*)object;
 -(FVDeclaration *)assignFrame:(CGRect)frame;
+-(FVDeclaration *)assignUnExpandedFrame:(CGRect)frame;
 -(FVDeclaration *)withDeclarations:(NSArray*)array;
 -(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration;
+-(void)insertDeclaration:(FVDeclaration *)declaration before:(FVDeclaration *)beforeDeclaration;
+-(void)insertDeclaration:(FVDeclaration *)declaration after:(FVDeclaration *)afterDeclaration;
+-(void)insertDeclaration:(FVDeclaration *)declaration atIndex:(NSInteger)index;
+
+-(FVDeclaration *)nodeForNextView;
+-(NSArray*)viewsToBeInserted;
+-(UIView *)superView;
+
 -(void)removeFromParentDeclaration;
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock;
 -(FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock;

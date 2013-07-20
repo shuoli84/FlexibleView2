@@ -15,13 +15,14 @@
 @property (nonatomic, assign) BOOL yCalculated;
 @property (nonatomic, assign) BOOL widthCalculated;
 @property (nonatomic, assign) BOOL heightCalculated;
-@property (nonatomic, assign) CGRect unExpandedFrame; // this is the original frame which not expanded.
 @property (nonatomic, strong) NSMutableArray *postProcessBlocks;
 
 @end
 
 @implementation FVDeclaration{
     NSMutableArray *_subDeclarations;
+    CGRect _frame;
+    CGRect _unExpandedFrame;
 }
 @synthesize parent = _parent;
 
@@ -148,11 +149,11 @@
                 if(!next.yCalculated){
                     [next calculateLayout];
                     NSAssert(next.yCalculated, @"FVFill for height: next y must be calculated");
-                    [self assignHeight: next.frame.origin.y - _frame.origin.y];
+                    [self assignHeight: next->_frame.origin.y - _frame.origin.y];
                 }
             }
             else{
-                [self assignHeight:_parent.frame.size.height - _frame.origin.y];
+                [self assignHeight:_parent->_frame.size.height - _frame.origin.y];
             }
         }
         else if(FVIsAuto(h)){
@@ -262,7 +263,7 @@
             }
         }
         else if (FVIsTail(w)){
-            NSAssert(_parent, @"FVTail must has a valid parent, and its width already calcualted");
+            NSAssert(_parent, @"%@ FVTail on width must has a valid parent", _name);
             if(_parent.widthCalculated){
                 [self assignWidth:_parent.frame.size.width - FVF2T(w)];
             }
@@ -336,7 +337,7 @@
             }
         }
         else if(FVIsTail(x)){
-            NSAssert(_parent, @"FVTail must has a valid parent, and its width already calcualted");
+            NSAssert(_parent, @"%@ FVTail on x must has a valid parent", _name);
             if(_parent.widthCalculated){
                 [self assignX: _parent.frame.size.width - FVF2T(x)];
             }
@@ -481,8 +482,8 @@
     FVDeclaration *dec = _parent;
     while(dec && dec.object == nil){
         NSAssert([dec calculated:NO], @"The parent's layout has to be calculated when call updateView frame in sub declaration");
-        offsetPoint.x += dec.frame.origin.x;
-        offsetPoint.y += dec.frame.origin.y;
+        offsetPoint.x += dec.expandedFrame.origin.x;
+        offsetPoint.y += dec.expandedFrame.origin.y;
         dec = dec.parent;
     }
 
@@ -514,13 +515,32 @@
 }
 
 -(FVDeclaration *)assignFrame:(CGRect)frame{
-    self.frame = frame;
+    return [self assignUnExpandedFrame:frame];
+}
+
+-(FVDeclaration *)assignUnExpandedFrame:(CGRect)frame{
+    [self setUnExpandedFrame:frame];
     return self;
+}
+
+-(CGRect)frame{
+    return _frame;
 }
 
 -(void)setFrame:(CGRect)frame{
     [self resetLayout];
     _unExpandedFrame = frame;
+}
+
+-(CGRect)expandedFrame{
+    return _frame;
+}
+
+-(void)setUnExpandedFrame:(CGRect)unExpandedFrame {
+    _unExpandedFrame = unExpandedFrame;
+}
+-(CGRect)unExpandedFrame {
+    return _unExpandedFrame;
 }
 
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock {
@@ -531,7 +551,6 @@
 -(void)resetLayout {
     [self resetLayoutWithDepth:INT32_MAX];
 }
-
 
 -(void)resetLayoutWithDepth:(int)depth {
     if (depth <= 0){
@@ -559,17 +578,21 @@
     }
     [_subDeclarations addObject:declaration];
     declaration->_parent = self;
+
+    [self insertViews:declaration.viewsToBeInserted atIndex:-1];
     return self;
 }
 
 -(void)removeDeclaration:(FVDeclaration*)declaration{
     [_subDeclarations removeObject:declaration];
+    declaration->_parent = nil;
+    [declaration.viewsToBeInserted each:^(UIView* view) {
+        [view removeFromSuperview];
+    }];
 }
 
 -(void)removeFromParentDeclaration {
     [_parent removeDeclaration:self];
-    [_object removeFromSuperview];
-    _parent = nil;
 }
 
 - (FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock {
@@ -579,4 +602,132 @@
     [_postProcessBlocks addObject:[processBlock copy]];
     return self;
 }
+
+/**
+* Insert declare involves insert subviews into parent view, which is a tricky case when there are virtual declare involved.
+* In order to maintain the correct order of subview, and also avoid the refresh all subviews with remove + add, we need to
+* do some calculation.
+*
+* Logic as follow:
+* depends on [view insertViewAtIndex]
+* calculate the correct index to insert
+* then go through all direct subview and insert into the parent view
+*/
+
+-(void)insertDeclaration:(FVDeclaration *)declaration before:(FVDeclaration *)beforeDeclaration{
+    [self insertDeclaration:declaration atIndex:[_subDeclarations indexOfObject:beforeDeclaration]];
+}
+
+-(void)insertDeclaration:(FVDeclaration *)declaration after:(FVDeclaration *)afterDeclaration{
+    [self insertDeclaration:declaration atIndex:[_subDeclarations indexOfObject:afterDeclaration] + 1];
+}
+
+-(void)insertDeclaration:(FVDeclaration *)declaration atIndex:(NSInteger)index{
+    int viewInsertIndex = -1;
+    if(index < _subDeclarations.count){
+        FVDeclaration *nodeForNextView = ((FVDeclaration *)_subDeclarations[index]).nodeForNextView;
+        if (nodeForNextView != nil){
+            viewInsertIndex = [nodeForNextView.object.superview.subviews indexOfObject:nodeForNextView.object];
+        }
+    }
+
+    [_subDeclarations insertObject:declaration atIndex:index];
+    declaration->_parent = self;
+
+    [self insertViews:declaration.viewsToBeInserted atIndex:viewInsertIndex];
+}
+
+-(void)insertView:(UIView *)view atIndex:(NSInteger)index{
+    UIView *containerView = _object;
+    if(containerView == nil){
+        containerView = self.superView;
+    }
+    if(containerView != nil){
+        //Insert all views into super view
+        if(index == -1){
+            index = containerView.subviews.count;
+        }
+        [containerView insertSubview:view atIndex:index];
+    }
+}
+
+-(void)insertViews:(NSArray*)views atIndex:(NSInteger)index{
+    UIView *containerView = _object;
+    if(containerView == nil){
+        containerView = self.superView;
+    }
+    if(containerView != nil){
+        //Insert all views into super view
+        if(index == -1){
+            index = containerView.subviews.count;
+        }
+        for(UIView *view in views){
+            [containerView insertSubview:view atIndex:index++];
+        }
+    }
+}
+
+-(NSArray*)viewsToBeInserted{
+    NSMutableArray *views = [NSMutableArray array];
+    if(self.object){
+        [views addObject:self.object];
+        return views;
+    }
+    else{
+        for(FVDeclaration *subDeclare in _subDeclarations){
+            [views addObjectsFromArray:subDeclare.viewsToBeInserted];
+        }
+    }
+
+    return views;
+}
+
+-(UIView *)superView{
+    FVDeclaration *d = _parent;
+    while(d != nil && d.object == nil){
+        d = d->_parent;
+    }
+
+    if(d == nil){
+        return nil;
+    }
+    return d.object;
+}
+
+-(FVDeclaration *)firstNodeWithView{
+    if(self.object != nil){
+        return self;
+    }
+
+    for(FVDeclaration *subDeclare in _subDeclarations){
+        FVDeclaration *d = [subDeclare firstNodeWithView];
+        if(d != nil){
+            return d;
+        }
+    }
+
+    return nil;
+}
+
+-(FVDeclaration *)nodeForNextView{
+    FVDeclaration *nextNodeToCheck = self.nextSibling;
+    FVDeclaration *checking = self;
+    while(nextNodeToCheck == nil && checking.parent != nil && checking.parent.object == nil){
+        checking = checking.parent;
+        nextNodeToCheck = checking.nextSibling;
+    }
+
+    if(nextNodeToCheck != nil){
+        FVDeclaration *node = [nextNodeToCheck firstNodeWithView];
+        if(node == nil){
+            node = [nextNodeToCheck nodeForNextView];
+        }
+
+        return node;
+    }
+    else{
+        return nil;
+    }
+}
+
 @end

@@ -10,6 +10,7 @@
 #import "FVDeclaration.h"
 #import "Kiwi.h"
 #import "NSObject+BlockObservation.h"
+#import "FVDeclareHelper.h"
 
 @interface DebugView : UIView
 @property (nonatomic, copy) void (^didAddSubviewBlock)(UIView* view, UIView* subview);
@@ -283,14 +284,14 @@ SPEC_BEGIN(DeclarationSpec)
                 });
 
                 it(@"should able to updateviewframe even itself is a virtual node", ^{
-                    declare* d = [declare declaration:@"root" frame:F(0, 0, 1000, 1000)];
-                    [d withDeclarations:@[
-                        [[declare declaration:@"p1" frame:F(FVP(0.5), FVP(0.5), FVP(0.5), FVP(0.5))] withDeclarations:@[
-                            [[declare declaration:@"p2" frame:F(FVA(10), FVA(10), FVTillEnd, FVTillEnd)] withDeclarations:@[
-                                [[declare declaration:@"v" frame:F(FVA(10), FVA(10), FVTillEnd, FVTillEnd)] assignObject:[UIView new]]
-                            ]]
-                        ]]
-                    ]];
+                    declare* d = dec(@"root",F(0, 0, 1000, 1000));
+                    [d $$:
+                        [dec(@"p1", F(FVP(0.5), FVP(0.5), FVP(0.5), FVP(0.5))) $$:
+                            [dec(@"p2", F(FVA(10), FVA(10), FVTillEnd, FVTillEnd)) $$:
+                                dec(@"v", F(FVA(10), FVA(10), FVTillEnd, FVTillEnd), [UIView new]),
+                                nil],
+                            nil],
+                        nil];
 
                     UIView *view = [[UIView alloc]init];
                     view.frame = F(0, 0, 1000, 1000);
@@ -321,6 +322,52 @@ SPEC_BEGIN(DeclarationSpec)
 
                     [[theValue(d.object.frame.origin.x == 500) should] beTrue];
                     [[theValue(d.object.frame.origin.y == 10) should] beTrue];
+                });
+            });
+
+
+            context(@"insertDeclare", ^{
+                it(@"should able to insert the declare in the right place", ^{
+                    FVDeclaration *declaration = [dec(@"1", CGRectZero, [UIView new]) $$:
+                        [dec(@"2") $$:
+                            [dec(@"4") $$:
+                                dec(@"5"),
+                                [dec(@"6", CGRectZero, [UIView new]) $$:
+                                    dec(@"13", CGRectZero, [UIView new]),
+                                    dec(@"14"),
+                                    nil
+                                ],
+                                [dec(@"10") $$:
+                                    dec(@"11"),
+                                    dec(@"12", CGRectZero, [UIView new]),
+                                    nil
+                                ],
+                                nil
+                            ],
+                            dec(@"7"),
+                            nil
+                        ],
+                        [dec(@"3") $$:
+                            dec(@"8", CGRectZero, [UIView new]),
+                            nil
+                        ],
+                        nil
+                    ];
+
+                    FVDeclaration *d = [[declaration declarationByName:@"6"] nodeForNextView];
+                    [[d.name should] equal:@"12"];
+
+                    [[[declaration declarationByName:@"12"].nodeForNextView.name should] equal:@"8"];
+
+                    [[declaration declarationByName:@"13"].nodeForNextView shouldBeNil];
+
+                    [[[declaration declarationByName:@"2"].nodeForNextView.name should] equal:@"8"];
+
+                    [[theValue(declaration.viewsToBeInserted.count) should] equal:theValue(1)];
+
+                    [declaration declarationByName:@"2"].viewsToBeInserted;
+
+                    [[[declaration declarationByName:@"2"].superView should] equal:declaration.object];
                 });
             });
         });
