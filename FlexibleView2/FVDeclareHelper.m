@@ -44,7 +44,7 @@ __attribute__((overloadable)) FVDeclaration *dec(NSString *name){
 }
 
 -(FVDeclaration *)f:(CGRect)frame{
-    return [self assignFrame:frame];
+    return [self assignUnExpandedFrame:frame];
 }
 
 -(FVDeclaration *)o:(UIView *)view{

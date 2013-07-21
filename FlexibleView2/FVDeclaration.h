@@ -113,16 +113,6 @@
 #define FVIsNormal(x) ((x) < FVSpecialValueMin)
 
 /**
-* The typedef of View creation block
-*/
-typedef UIView* (^FVViewCreateBlock)(NSDictionary *context);
-
-/**
-* The typedef of template block, a typical usage: Create one block for each reusable UI element. The bar, form element etc.
-*/
-typedef FVDeclaration *(^FVDeclareTemplateBlock)();
-
-/**
 * The typedef of process block.
 */
 typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
@@ -170,40 +160,25 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 * The object is the view for this declaration, it will be merged with all sub declaration and returned
 * when [self loadView] called
 */
-@property (nonatomic, strong) UIView *object; //this is the object which this declaration owns
+@property (nonatomic, strong) UIView *object;
 
 +(FVDeclaration *)declaration:(NSString*)name frame:(CGRect)frame;
 
--(void)setFrame:(CGRect)frame __deprecated;
--(CGRect)frame __deprecated;
 -(CGRect)expandedFrame;
 
 -(void)setUnExpandedFrame:(CGRect)unExpandedFrame;
 -(CGRect)unExpandedFrame;
 
 -(FVDeclaration *)assignObject:(UIView*)object;
--(FVDeclaration *)assignFrame:(CGRect)frame;
 -(FVDeclaration *)assignUnExpandedFrame:(CGRect)frame;
 -(FVDeclaration *)withDeclarations:(NSArray*)array;
 -(FVDeclaration *)appendDeclaration:(FVDeclaration *)declaration;
--(void)insertDeclaration:(FVDeclaration *)declaration before:(FVDeclaration *)beforeDeclaration;
--(void)insertDeclaration:(FVDeclaration *)declaration after:(FVDeclaration *)afterDeclaration;
--(void)insertDeclaration:(FVDeclaration *)declaration atIndex:(NSInteger)index;
-
--(FVDeclaration *)nodeForNextView;
--(NSArray*)viewsToBeInserted;
--(UIView *)superView;
 
 -(void)removeFromParentDeclaration;
 -(FVDeclaration *)process:(FVDeclarationProcessBlock)processBlock;
 -(FVDeclaration *)postProcess:(FVDeclarationProcessBlock)processBlock;
 
 -(FVDeclaration *)declarationByName:(NSString*)name;
-
-/**
-* Calculate the layout, call this before get the final loadView
-*/
--(void)calculateLayout;
 
 /**
 * Reset the calculated layout and clear the flags.
@@ -215,7 +190,6 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 * After this, the view's frame need to be bound again, one should call loadViews again.
 */
 -(void)resetLayout;
-
 
 /**
 * In many cases, the layout just need to be reset on speicific ones, and reset all sub view is a overkill,
@@ -232,24 +206,10 @@ typedef void (^FVDeclarationProcessBlock)(FVDeclaration *);
 -(BOOL)calculated:(BOOL)recursive;
 
 /**
-* Get the fully setup loadView, it contains all the sub views.
-*
-* @warning: *important* When get the view, it will give up the ownership to prevent cycle pointer.
-* From that point, declaration only holds a weak pointer for future usage.
-*
-* deprecated, use fillView:offsetFrame: instead
+* setupViewTree build the view tree, but not do any layout calculation.
 */
--(UIView *)loadView __deprecated;
-
-/**
-* New way to get fully setup view, it no longer require each declare has a UIView object, which helps to reduce the
-* memory and CPU used by the framework
-*
-* @param superView push the result into view
-*
-* @warning: *important* this method no longer cleans old subview's, its developer's responsibility now
-*/
--(void)fillView:(UIView *)superView;
+-(void)setupViewTree;
+-(void)setupViewTreeInto:(UIView *)superView;
 
 /**
 * UpdateViewFrame will only update view's frame based on calculated result, it will not refresh the view tree. This is

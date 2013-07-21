@@ -61,7 +61,8 @@ SPEC_BEGIN(DeclarationSpec)
                             ]],
                         ]],
                     ]];
-                    [root calculateLayout];
+                    [root setupViewTree];
+                    [root updateViewFrame];
                 });
 
                 it(@"should able to fetch by name", ^{
@@ -84,35 +85,34 @@ SPEC_BEGIN(DeclarationSpec)
                 });
 
                 it(@"should able to accept absolute values", ^{
-                    [root calculateLayout];
-                    [[theValue(root.frame.origin.x) should] equal:theValue(0)];
-                    [[theValue(root.frame.size.width) should] equal:theValue(1000)];
+                    [[theValue(root.expandedFrame.origin.x) should] equal:theValue(0)];
+                    [[theValue(root.expandedFrame.size.width) should] equal:theValue(1000)];
 
                     FVDeclaration *navigation = [root declarationByName:@"NavigationBar"];
                     [navigation shouldNotBeNil];
-                    [[theValue(navigation.frame.size.width) should] equal:theValue(1000)];
+                    [[theValue(navigation.expandedFrame.size.width) should] equal:theValue(1000)];
                 });
 
                 it(@"fill should auto calculate", ^{
                     FVDeclaration *fill = [root declarationByName:@"fill"];
-                    [[theValue(fill.frame.size.width) should] equal:theValue(1000 - 44 * 2)];
+                    [[theValue(fill.expandedFrame.size.width) should] equal:theValue(1000 - 44 * 2)];
                 });
 
                 it(@"should be able to handle FVFoFVAfter", ^{
                     FVDeclaration *follow1 = [root declarationByName:@"follow1"];
                     FVDeclaration *follow2 = [root declarationByName:@"follow2"];
-                    [[theValue(follow1.frame.origin.x) should] equal:theValue(44)];
-                    [[theValue(follow2.frame.origin.x) should] equal:theValue(88)];
+                    [[theValue(follow1.expandedFrame.origin.x) should] equal:theValue(44)];
+                    [[theValue(follow2.expandedFrame.origin.x) should] equal:theValue(88)];
                 });
 
                 it(@"Percent supported", ^{
                     FVDeclaration *yp1 = [root declarationByName:@"yp1"];
-                    [[theValue(roundf(yp1.frame.size.height)) should] equal:theValue(100)];
+                    [[theValue(roundf(yp1.expandedFrame.size.height)) should] equal:theValue(100)];
                 });
 
                 it(@"should be able to handle FVAuto", ^{
                     FVDeclaration *autoDeclare = [root declarationByName:@"auto"];
-                    [[theValue(autoDeclare.frame.size.width) should] equal:
+                    [[theValue(autoDeclare.expandedFrame.size.width) should] equal:
                     theValue(44*3)];
                 });
 
@@ -127,8 +127,8 @@ SPEC_BEGIN(DeclarationSpec)
 
                 it(@"should support recalculate on newer setted frame", ^{
                     [root resetLayout];
-                    [root assignFrame:CGRectMake(0, 0, 100, 100)];
-                    UIView *v = [root loadView];
+                    [root assignUnExpandedFrame:CGRectMake(0, 0, 100, 100)];
+                    [root updateViewFrame];
                 });
 
                 it(@"should support post process", ^{
@@ -138,9 +138,7 @@ SPEC_BEGIN(DeclarationSpec)
                     }];
 
                     [[theValue(flag) should] equal:theValue(0)];
-
-                    [declare loadView];
-
+                    [declare updateViewFrame];
                     [[theValue(flag) should] equal:theValue(1)];
 
                 });
@@ -150,13 +148,13 @@ SPEC_BEGIN(DeclarationSpec)
                     [[declaration withDeclarations:@[
                         [FVDeclaration declaration:@"width" frame:CGRectMake(0, 0, FVT(100), FVP(1))],
                         [FVDeclaration declaration:@"height" frame:CGRectMake(0, 0, FVP(1), FVT(200))],
-                    ]] loadView];
+                    ]] updateViewFrame];
 
                     FVDeclaration *width = [declaration declarationByName:@"width"];
                     FVDeclaration *height = [declaration declarationByName:@"height"];
 
-                    [[theValue(width.frame.size.width) should] equal:theValue(900)];
-                    [[theValue(height.frame.size.height) should] equal:theValue(800)];
+                    [[theValue(width.expandedFrame.size.width) should] equal:theValue(900)];
+                    [[theValue(height.expandedFrame.size.height) should] equal:theValue(800)];
                 });
 
                 #define F CGRectMake
@@ -170,15 +168,15 @@ SPEC_BEGIN(DeclarationSpec)
                             [declare declaration:@"sub2" frame:F(10, 10, 30, 30)],
                         ]],
                     ]];
-                    [declaration loadView];
+                    [declaration updateViewFrame];
                     FVDeclaration *center = [declaration declarationByName:@"center"];
-                    [[theValue(center.frame.origin.x) should] equal:theValue(480)];
-                    [[theValue(center.frame.origin.y) should] equal:theValue(480)];
+                    [[theValue(center.expandedFrame.origin.x) should] equal:theValue(480)];
+                    [[theValue(center.expandedFrame.origin.y) should] equal:theValue(480)];
                     declare* centerAutoWidth = [declaration declarationByName:@"center-autowidth"];
-                    [[theValue(centerAutoWidth.frame.origin.x) should] equal:theValue(480)];
-                    [[theValue(centerAutoWidth.frame.size.width) should] equal:theValue(40)];
-                    [[theValue(centerAutoWidth.frame.origin.y) should] equal:theValue(480)];
-                    [[theValue(centerAutoWidth.frame.size.height) should] equal:theValue(40)];
+                    [[theValue(centerAutoWidth.expandedFrame.origin.x) should] equal:theValue(480)];
+                    [[theValue(centerAutoWidth.expandedFrame.size.width) should] equal:theValue(40)];
+                    [[theValue(centerAutoWidth.expandedFrame.origin.y) should] equal:theValue(480)];
+                    [[theValue(centerAutoWidth.expandedFrame.size.height) should] equal:theValue(40)];
                 });
 
                 it(@"should support autoTail calculation", ^{
@@ -190,15 +188,15 @@ SPEC_BEGIN(DeclarationSpec)
                             [[declare declaration:@"sub2" frame:F(10, 10, 30, 30)] assignObject:[UIView new]],
                         ]],
                     ]];
-                    [declaration fillView:nil];
+                    [declaration updateViewFrame];
                     FVDeclaration *center = [declaration declarationByName:@"center"];
-                    [[theValue(center.frame.origin.x) should] equal:theValue(960)];
-                    [[theValue(center.frame.origin.y) should] equal:theValue(960)];
+                    [[theValue(center.expandedFrame.origin.x) should] equal:theValue(960)];
+                    [[theValue(center.expandedFrame.origin.y) should] equal:theValue(960)];
                     declare* centerAutoWidth = [declaration declarationByName:@"center-autowidth"];
-                    [[theValue(centerAutoWidth.frame.origin.x) should] equal:theValue(960)];
-                    [[theValue(centerAutoWidth.frame.size.width) should] equal:theValue(40)];
-                    [[theValue(centerAutoWidth.frame.origin.y) should] equal:theValue(960)];
-                    [[theValue(centerAutoWidth.frame.size.height) should] equal:theValue(40)];
+                    [[theValue(centerAutoWidth.expandedFrame.origin.x) should] equal:theValue(960)];
+                    [[theValue(centerAutoWidth.expandedFrame.size.width) should] equal:theValue(40)];
+                    [[theValue(centerAutoWidth.expandedFrame.origin.y) should] equal:theValue(960)];
+                    [[theValue(centerAutoWidth.expandedFrame.size.height) should] equal:theValue(40)];
 
                     declare* sub2 = [declaration declarationByName:@"sub2"];
                     NSLog(@"%@", NSStringFromCGRect(sub2.object.frame));
@@ -212,9 +210,9 @@ SPEC_BEGIN(DeclarationSpec)
                             [[declare declaration:@"sub1" frame:F(0, 0, 30, 30)] assignObject:[UIView new]],
                         ]],
                     ]];
-                    [declaration fillView:nil];
+                    [declaration updateViewFrame];
 
-                    CGRect f = [declaration declarationByName:@"tillEnd"].frame;
+                    CGRect f = [declaration declarationByName:@"tillEnd"].expandedFrame;
                     [[theValue(f.size.width) should] equal:theValue(970)];
                     [[theValue(f.size.height) should] equal:theValue(970)];
                 });
@@ -233,13 +231,13 @@ SPEC_BEGIN(DeclarationSpec)
                         called = YES;
                     };
 
-                    [declaration fillView:nil];
+                    [declaration setupViewTree];
+                    [declaration updateViewFrame];
 
                     [[theValue(called) should] beYes];
                     called = NO;
 
-                    [declaration resetLayout];
-                    [declaration declarationByName:@"sub1"].frame = F(0, 0, 50, 50);
+                    [declaration declarationByName:@"sub1"].unExpandedFrame = F(0, 0, 50, 50);
                     [declaration updateViewFrame];
 
                     NSLog(@"%@", NSStringFromCGRect([declaration declarationByName:@"sub1"].object.frame));
@@ -255,17 +253,16 @@ SPEC_BEGIN(DeclarationSpec)
                         ]],
                     ]];
 
-                    [declaration fillView:nil];
-                    UIView* sub1 = [declaration declarationByName:@"sub1"].object;
+                    [declaration updateViewFrame];
                     UIView* sub2 = [declaration declarationByName:@"sub2"].object;
 
                     UIView *superView = [UIView new];
                     superView.frame = F(0, 0, 1000, 1000);
 
                     [superView addObserverForKeyPaths:@[@"frame", @"bounds"] task:^(id obj, NSString *keyPath) {
-                        [declaration resetLayout];
-                        declaration.frame = [obj bounds];
-                        [declaration fillView:obj];
+                        declaration.unExpandedFrame = [obj bounds];
+                        [declaration updateViewFrame];
+                        [obj addSubview:declaration.object];
                     }];
 
                     superView.frame = F(0, 0, 2000, 2000);
@@ -296,78 +293,17 @@ SPEC_BEGIN(DeclarationSpec)
                     UIView *view = [[UIView alloc]init];
                     view.frame = F(0, 0, 1000, 1000);
 
-                    [d fillView:view];
+                    [d updateViewFrame];
                     NSString *str1 = NSStringFromCGRect([[view.subviews lastObject] frame]);
 
                     declare* d1 = [d declarationByName:@"v"];
-                    [d1 resetLayout];
-                    [d1 updateViewFrame];
-
                     NSString *str2 = NSStringFromCGRect([[view.subviews lastObject] frame]);
 
-                    [d1 resetLayout];
-                    [d1 fillView:nil];
-
+                    [d1 updateViewFrame];
                     NSString *str3 = NSStringFromCGRect([[view.subviews lastObject] frame]);
 
                     [[str1 should] equal:str2];
                     [[str1 should] equal:str3];
-                });
-
-                it(@"should support direct fill into view", ^{
-                    declare* d = [[declare declaration:@"v" frame:F(FVP(0.5), 10, 20, 20)] assignObject:[UIView new]];
-                    UIView *v = [UIView new];
-                    v.frame = F(0, 0, 1000, 1000);
-                    [d fillView:v];
-
-                    [[theValue(d.object.frame.origin.x == 500) should] beTrue];
-                    [[theValue(d.object.frame.origin.y == 10) should] beTrue];
-                });
-            });
-
-
-            context(@"insertDeclare", ^{
-                it(@"should able to insert the declare in the right place", ^{
-                    FVDeclaration *declaration = [dec(@"1", CGRectZero, [UIView new]) $$:
-                        [dec(@"2") $$:
-                            [dec(@"4") $$:
-                                dec(@"5"),
-                                [dec(@"6", CGRectZero, [UIView new]) $$:
-                                    dec(@"13", CGRectZero, [UIView new]),
-                                    dec(@"14"),
-                                    nil
-                                ],
-                                [dec(@"10") $$:
-                                    dec(@"11"),
-                                    dec(@"12", CGRectZero, [UIView new]),
-                                    nil
-                                ],
-                                nil
-                            ],
-                            dec(@"7"),
-                            nil
-                        ],
-                        [dec(@"3") $$:
-                            dec(@"8", CGRectZero, [UIView new]),
-                            nil
-                        ],
-                        nil
-                    ];
-
-                    FVDeclaration *d = [[declaration declarationByName:@"6"] nodeForNextView];
-                    [[d.name should] equal:@"12"];
-
-                    [[[declaration declarationByName:@"12"].nodeForNextView.name should] equal:@"8"];
-
-                    [[declaration declarationByName:@"13"].nodeForNextView shouldBeNil];
-
-                    [[[declaration declarationByName:@"2"].nodeForNextView.name should] equal:@"8"];
-
-                    [[theValue(declaration.viewsToBeInserted.count) should] equal:theValue(1)];
-
-                    [declaration declarationByName:@"2"].viewsToBeInserted;
-
-                    [[[declaration declarationByName:@"2"].superView should] equal:declaration.object];
                 });
             });
         });

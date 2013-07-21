@@ -22,19 +22,7 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    FVViewCreateBlock space = ^(NSDictionary *context){
-        UIView *sp = [[UIView alloc] init];
-        return sp;
-    };
-
-    FVDeclareTemplateBlock template = ^{
-        return [[FVDeclaration declaration:@"NavigationBar" frame:CGRectMake(0, 0, FVP(1), 44)] withDeclarations:@[
-            [FVDeclaration declaration:@"MenuButton" frame:CGRectMake(0, 0, 44, FVP(1))],
-            [FVDeclaration declaration:@"ComposeButton" frame:CGRectMake(FVT(44), 0, 44, FVP(1))],]];
-    };
-
     self.root = [[FVDeclaration declaration:@"root" frame:CGRectMake(0, 0, self.window.screen.bounds.size.width, self.window.screen.bounds.size.height - 30)] withDeclarations:@[
-        template(),
         [[FVDeclaration declaration:@"ContentView" frame:CGRectMake(0, 44, FVP(1), FVFill)] withDeclarations:@[
             [FVDeclaration declaration:@"percent50" frame:CGRectMake(0, 0, FVP(0.5), 44)],
             [FVDeclaration declaration:@"percentOther50" frame:CGRectMake(0, 0, FVP(0.5), FVSameAsPrev)],
@@ -46,9 +34,6 @@
             [FVDeclaration declaration:@"followLeft" frame:CGRectMake(0, 44 * 2, 44, FVSameAsPrev)],
             [FVDeclaration declaration:@"follow1" frame:CGRectMake(FVAfter, 44 * 2, 44, FVSameAsPrev)],
             [FVDeclaration declaration:@"follow2" frame:CGRectMake(FVAfter, 44 * 2, 44, 44)],
-
-            //Add one space here
-            [[FVDeclaration declaration:@"space" frame:CGRectMake(0, FVAfter, FVFill, 30)] assignObject:space(nil)],
 
             [[FVDeclaration declaration:@"auto" frame:CGRectMake(0, FVAfter, FVAuto, FVAuto)] withDeclarations:@[
                 [FVDeclaration declaration:@"auto1" frame:CGRectMake(10, 0, 44, 44)],
@@ -62,14 +47,12 @@
 
                 CGFloat v = button.frame.size.height;
 
-                [self.root resetLayout];
-                [[self.root declarationByName:@"increaseme"] assignFrame:CGRectMake(0, FVT(350), FVP(1), v + 200)];
-                [self.root loadView];
+                [[self.root declarationByName:@"increaseme"] assignUnExpandedFrame:CGRectMake(0, FVT(350), FVP(1), v + 200)];
+                [[self.root declarationByName:@"increaseme"] updateViewFrame];
 
                 [UIView beginAnimations:nil context:nil];
-                [self.root resetLayout];
-                [[self.root declarationByName:@"increaseme"] assignFrame:CGRectMake(0, FVT(350), FVP(1), v + 30)];
-                [self.root loadView];
+                [[self.root declarationByName:@"increaseme"] assignUnExpandedFrame:CGRectMake(0, FVT(350), FVP(1), v + 30)];
+                [self.root updateViewFrame];
                 [UIView commitAnimations];
             } forControlEvents:UIControlEventTouchUpInside];
 
@@ -80,20 +63,24 @@
                 UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
                 [button setTitle:@"click add element" forState:UIControlStateNormal];
                 [button addEventHandler:^(id sender) {
-                    FVDeclaration *dec = [self.root declarationByName:@"addsomecontainer"];
-                    [dec resetLayout];
-                    FVDeclaration *newdec = [FVDeclaration declaration:@"newview" frame:CGRectMake(FVT(100), FVAfter, FVP(1), 50)];
-                    FVDeclaration *olddec = [dec declarationByName:@"newview"];
+                    FVDeclaration *d = [self.root declarationByName:@"addsomecontainer"];
+                    [d resetLayout];
+                    FVDeclaration *newdec = dec(@"newview", CGRectMake(FVT(0), FVAfter, FVP(1), 50), ^{
+                        UIView *view = [[UIView alloc]init];
+                        view.backgroundColor = [UIColor blackColor];
+                        return view;
+                    }());
+                    FVDeclaration *olddec = [d declarationByName:@"newview"];
 
-                    [dec appendDeclaration:newdec];
-                    [dec loadView];
+                    [d appendDeclaration:newdec];
+                    [d updateViewFrame];
 
                     [UIView beginAnimations:nil context:nil];
-                    [UIView setAnimationDuration:3];
-                    [dec resetLayout];
+
+                    [UIView setAnimationDuration:.5];
                     [olddec removeFromParentDeclaration];
-                    [newdec assignFrame:CGRectMake(0, FVAfter, FVP(1), 50)];
-                    [dec loadView];
+                    [newdec assignUnExpandedFrame:CGRectMake(0, FVAfter, FVP(1), 50)];
+                    [newdec updateViewFrame];
                     [UIView commitAnimations];
                 } forControlEvents:UIControlEventTouchUpInside];
 
@@ -108,7 +95,7 @@
             }
             return array;
         }()],
-        [template() assignFrame:CGRectMake(FVP(0.05), FVT(44), FVP(0.9), 44)],]];
+        ]];
 
     FVDeclaration *autoD = [self.root declarationByName:@"auto"];
     [autoD assignObject:^{
@@ -119,7 +106,8 @@
 
     UIViewController *controller = [[UIViewController alloc] init];
     [self.root assignObject:controller.view];
-    [self.root loadView];
+    [self.root setupViewTree];
+    [self.root updateViewFrame];
     // add the background color for each loadView
     [[controller.view subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         UIView *v = obj;
