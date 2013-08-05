@@ -130,7 +130,8 @@
             if (next) {
                 if(!next.yCalculated){
                     [next calculateLayout];
-                    NSAssert(next.yCalculated, @"%@ FVFill for height: next y must be calculated", _name);
+                }
+                if(next.yCalculated){
                     [self assignHeight: next->_expandedFrame.origin.y - _expandedFrame.origin.y];
                 }
             }
