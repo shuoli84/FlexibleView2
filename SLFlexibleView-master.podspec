@@ -10,6 +10,6 @@ Pod::Spec.new do |s|
 
   s.platform     = :ios, '5.0'
 
-  s.source_files = 'FlexibleView2/*.{h,m}'
+  s.source_files = 'FlexibleView2/FVDec*.{h,m}'
   s.requires_arc = true
 end
