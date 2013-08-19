@@ -305,6 +305,18 @@ SPEC_BEGIN(DeclarationSpec)
                     [[str1 should] equal:str2];
                     [[str1 should] equal:str3];
                 });
+
+                it(@"should able to use origin value for view", ^{
+                    UIView *view = [[UIView alloc] initWithFrame:F(1, 2, 1001, 1002)];
+                    declare *d = dec(@"root", F(FVKeepOrigin, FVKeepOrigin, FVKeepOrigin, FVKeepOrigin), view);
+                    [d updateViewFrame];
+
+                    [[theValue(view.frame.origin.x) should] equal:theValue(1)];
+                    [[theValue(view.frame.origin.y) should] equal:theValue(2)];
+                    [[theValue(view.frame.size.width) should] equal:theValue(1001)];
+                    [[theValue(view.frame.size.height) should] equal:theValue(1002)];
+
+                });
             });
         });
 SPEC_END

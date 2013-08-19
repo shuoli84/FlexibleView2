@@ -159,6 +159,10 @@
             NSAssert(self.yCalculated, @"%@ Height TillEnd requires y calculated", _name);
             [self assignHeight:_parent->_expandedFrame.size.height - _expandedFrame.origin.y];
         }
+        else if(FVIsKeepOrigin(h)){
+            NSAssert(_object, @"%@ Keep origin require a view", _name);
+            [self assignHeight:_object.frame.size.height];
+        }
         else{
             NSAssert(NO, @"%@ Code should not hit this place", _name);
         }
@@ -217,6 +221,10 @@
             }
             NSAssert(self.heightCalculated, @"%@ Height must be calculated for FVAutoTail Y", _name);
             [self assignY:(_parent.frame.size.height - _expandedFrame.size.height)];
+        }
+        else if(FVIsKeepOrigin(y)){
+            NSAssert(_object, @"%@ Y keep origin requires a valid object", _name);
+            [self assignY:_object.frame.origin.y];
         }
     }
 }
@@ -282,6 +290,10 @@
             NSAssert(self.xCalculated, @"%@ TillEnd requires x already calculated", _name);
             [self assignWidth:_parent->_expandedFrame.size.width - _expandedFrame.origin.x];
         }
+        else if(FVIsKeepOrigin(w)){
+            NSAssert(_object, @"%@ W keep origin requires a valid object", _name);
+            [self assignWidth:_object.frame.size.width];
+        }
     }
 }
 
@@ -339,6 +351,10 @@
             else if(FVIsAutoTail(x)){
                 [self assignX:(_parent.frame.size.width - _expandedFrame.size.width)];
             }
+        }
+        else if(FVIsKeepOrigin(x)){
+            NSAssert(_object, @"%@ X keep origin requires a valid object", _name);
+            [self assignX:_object.frame.origin.x];
         }
     }
 }

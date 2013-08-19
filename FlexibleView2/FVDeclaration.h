@@ -61,6 +61,12 @@
 #define FVIsTillEnd(x) ((x)==FVTillEnd)
 
 /**
+* FVKeepOrigin indicates that it should use view's original value
+*/
+#define FVKeepOrigin 100006
+#define FVIsKeepOrigin(x) ((x) == FVKeepOrigin)
+
+/**
 *
 */
 #define FVPercentMin 110000
