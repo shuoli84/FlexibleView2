@@ -157,7 +157,7 @@
         else if (FVIsTillEnd(h)){
             NSAssert(_parent && _parent.heightCalculated, @"%@ Height TillEnd requires a valid parent and its height already calculated", _name);
             NSAssert(self.yCalculated, @"%@ Height TillEnd requires y calculated", _name);
-            [self assignHeight:_parent->_expandedFrame.size.height - _expandedFrame.origin.y];
+            [self assignHeight:_parent->_expandedFrame.size.height - _expandedFrame.origin.y + FVF2E(h)];
         }
         else if(FVIsKeepOrigin(h)){
             NSAssert(_object, @"%@ Keep origin require a view", _name);
@@ -288,7 +288,7 @@
         else if (FVIsTillEnd(w)){
             NSAssert(_parent && _parent.widthCalculated, @"%@ TillEnd requires a valid parent and its width calculated", _name);
             NSAssert(self.xCalculated, @"%@ TillEnd requires x already calculated", _name);
-            [self assignWidth:_parent->_expandedFrame.size.width - _expandedFrame.origin.x];
+            [self assignWidth:_parent->_expandedFrame.size.width - _expandedFrame.origin.x + FVF2E(w)];
         }
         else if(FVIsKeepOrigin(w)){
             NSAssert(_object, @"%@ W keep origin requires a valid object", _name);

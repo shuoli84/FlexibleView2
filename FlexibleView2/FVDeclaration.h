@@ -57,8 +57,13 @@
 /**
 * FVTillEnd set the view's width or height to fill the parent, no matter whether there is following views
 */
-#define FVTillEnd 100005
-#define FVIsTillEnd(x) ((x)==FVTillEnd)
+#define FVEndMin 400000
+#define FVEndBase 450000
+#define FVEndMax 499999
+#define FVE(x) ((x) + FVEndBase)
+#define FVF2E(x) ((x) - FVEndBase)
+#define FVIsTillEnd(x) ((x)>=FVEndMin && (x)<=FVEndMax)
+#define FVTillEnd FVE(0)
 
 /**
 * FVKeepOrigin indicates that it should use view's original value

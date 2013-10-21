@@ -306,6 +306,18 @@ SPEC_BEGIN(DeclarationSpec)
                     [[str1 should] equal:str3];
                 });
 
+                it(@"should able to use offset in tillend", ^{
+                    declare *d = [dec(@"container", CGRectMake(0, 0, 1000, 1000)) $:@[
+                        dec(@"left", CGRectMake(100, 0, FVE(-50), FVTillEnd)),
+                    ]];
+                    [d setupViewTree];
+                    [d updateViewFrame];
+                    CGFloat w = [d declarationByName:@"left"].expandedFrame.size.width;
+                    [[theValue(w) should] equal:theValue(850)];
+                    CGFloat h = [d declarationByName:@"left"].expandedFrame.size.height;
+                    [[theValue(h) should] equal:theValue(1000)];
+                });
+
                 it(@"should able to use origin value for view", ^{
                     UIView *view = [[UIView alloc] initWithFrame:F(1, 2, 1001, 1002)];
                     declare *d = dec(@"root", F(FVKeepOrigin, FVKeepOrigin, FVKeepOrigin, FVKeepOrigin), view);
